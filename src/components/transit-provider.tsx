@@ -3,7 +3,7 @@ import {createContext,useContext,useEffect,useMemo,useRef,useState,type ReactNod
 import {usePathname} from 'next/navigation';
 import {useApp} from './app-provider';
 import type {TransitStation,TransitNearby,TransitRoutes} from '@/lib/transit';
-import {fetchTransitNearby,fetchTransitRoutes} from '@/lib/transit-client';
+import {fetchTransitNearby,fetchTransitRoutes,cachedTransitRoutes} from '@/lib/transit-client';
 import {OdsayError} from '@/lib/odsay-data';
 type NearbyState={key:string;status:'loading'|'success'|'error';data?:TransitNearby;error?:string;code?:string};
 type RouteState={key:string;status:'loading'|'success'|'error';data?:TransitRoutes;error?:string;code?:string};
@@ -14,7 +14,7 @@ export function TransitProvider({children}:{children:ReactNode}){
   const origin=selected?.source==='kakao'?selected.coordinates:null;const destination=data.destinationLocation?.source==='kakao'?data.destinationLocation.coordinates:null;
   const originKey=origin?`${selected!.id}|${origin.lat}|${origin.lng}|${data.radius}`:'';
   const routeKey=origin&&destination?`${selected!.id}|${origin.lat}|${origin.lng}|${data.destinationLocation!.id}|${destination.lat}|${destination.lng}`:'';
-  const active=pathname==='/transport'||pathname==='/summary';
+  const active=pathname==='/transport';
   useEffect(()=>{
     focusStation(null);if(!ready||!origin||!active)return;
     const controller=new AbortController();setNearbyState({key:originKey,status:'loading'});
@@ -22,7 +22,7 @@ export function TransitProvider({children}:{children:ReactNode}){
       .catch(error=>{if(!controller.signal.aborted)setNearbyState({key:originKey,status:'error',error:error instanceof Error?error.message:'정류장을 조회하지 못했습니다.',code:error instanceof OdsayError?error.code:undefined});});
     return()=>controller.abort();
   },[ready,originKey,origin?.lat,origin?.lng,data.radius,active,attempt]);
-  useEffect(()=>{routeController.current?.abort();},[routeKey]);useEffect(()=>()=>routeController.current?.abort(),[]);
+  useEffect(()=>{routeController.current?.abort();if(!origin||!destination){setRouteState(null);return;}const hit=cachedTransitRoutes(origin,destination);setRouteState(hit?{key:routeKey,status:'success',data:hit}:null);},[routeKey]);useEffect(()=>()=>routeController.current?.abort(),[]);
   const queryRoutes=()=>{
     if(!origin||!destination)return;routeController.current?.abort();const controller=new AbortController();routeController.current=controller;setRouteState({key:routeKey,status:'loading'});
     fetchTransitRoutes(origin,destination,controller.signal).then(result=>{if(!controller.signal.aborted)setRouteState({key:routeKey,status:'success',data:result});})

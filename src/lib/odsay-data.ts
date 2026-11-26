@@ -12,7 +12,7 @@ export function parseOdsayBody(value:unknown,mode:'web'|'server'){
   if(body.error){
     const code=String(upstreamError.code??'UNKNOWN'),message=String(upstreamError.message??'');
     if(/ApiKeyAuthFailed|authentication|API.?KEY|인증/i.test(message))throw new OdsayError('AUTH',503,mode==='web'?'ODsay Web 인증에 실패했습니다. Web 키와 현재 접속 주소의 등록 URI를 확인해 주세요.':'ODsay Server 인증에 실패했습니다. Server 키와 서버의 공인 IP 등록을 확인해 주세요.');
-    if(/daily.*quota/i.test(message))throw new OdsayError('QUOTA',429,'ODsay 일일 요청 한도를 초과했습니다. 콘솔 사용량을 확인하고 한도 초기화 후 다시 조회해 주세요.');
+    if(code==='429'||/daily.*quota/i.test(message))throw new OdsayError('QUOTA',429,'ODsay 일일 요청 한도를 초과했습니다. 자동 재시도하지 않으며 기존 캐시 결과만 사용합니다.');
     if(/quota|limit|초당|한도|초과/i.test(message))throw new OdsayError('QUOTA',429,'대중교통 요청 한도를 초과했습니다. 잠시 후 다시 조회해 주세요.');
     if(emptyCodes.has(code))return {result:null,emptyCode:code};
     throw new OdsayError('UPSTREAM',502,'대중교통 정보를 조회하지 못했습니다. 잠시 후 다시 조회해 주세요.');

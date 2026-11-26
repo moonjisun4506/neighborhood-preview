@@ -3,7 +3,7 @@ import type {TransitNearby,TransitRoutes} from './transit';
 export const summarySections={overview:'한 줄 생활환경 요약',facilities:'주변 생활 편의시설의 특징',transit:'대중교통 및 통학 정보',rent:'월세 참고 정보',benefits:'생활하면서 편리할 수 있는 점',checks:'계약 전 추가 확인 사항'} as const;
 export type SectionKey=keyof typeof summarySections;
 export type Evidence={id:string;section:SectionKey;text:string;source:string};
-export type AiSummary={id:string;mode:'address'|'compare';addressIds:string[];generatedAt:string;model:string;conditions:{radius:number;destination:string|null;days:number;roundTrip:boolean;month:string;type:string;min:number;max:number|null};sections:{key:SectionKey;title:string;items:{evidenceId:string;text:string;source:string}[]}[];evidence:Evidence[]};
+export type AiSummary={id:string;mode:'address'|'compare';style?:'concise';addressIds:string[];generatedAt:string;model:string;conditions:{radius:number;destination:string|null;days:number;roundTrip:boolean;month:string;type:string;min:number;max:number|null};sections:{key:SectionKey;title:string;items:{evidenceId:string;text:string;source:string}[]}[];evidence:Evidence[]};
 export type SummaryRequest={addresses:AddressRecord[];radius:number;destination:AddressRecord|null;days:number;roundTrip:boolean;month:string;type:string;min:number;max:number|null;transit:{addressId:string;nearby:TransitNearby|null;routes:TransitRoutes|null}[]};
 export type SummaryPlan=Record<SectionKey,string[]>;
 export function renderPlan(plan:unknown,evidence:Evidence[]):AiSummary['sections']{

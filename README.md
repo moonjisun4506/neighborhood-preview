@@ -2,6 +2,8 @@
 
 사용자가 직접 검색한 집 주소의 주변 생활환경을 지도에서 확인하고, 관심 주소를 저장·메모·비교하는 웹앱입니다. AI는 실제 조회한 자료를 요약하며 주소를 추천하거나 순위를 매기지 않습니다.
 
+시설 목록은 종류별 가장 가까운 2곳만 직선거리순으로 표시하며 지도 마커는 전체 검색 결과를 유지합니다. ODsay 조회는 같은 브라우저 탭에서 24시간 캐시하고 새로고침·탭 전환·AI 요약의 중복 호출을 줄입니다. 한도 오류 후 자동 재시도하지 않습니다. AI 단일 주소 요약은 실제 근거에 따른 6문장으로 간소화했습니다. 소음 자료가 없으면 집의 소음은 확인할 수 없다고 안내합니다. 상세 변경·검증·캐시 범위는 [CONCISE_ENVIRONMENT_REPORT.md](./CONCISE_ENVIRONMENT_REPORT.md)를 확인하세요.
+
 ## 주요 기능
 
 - 카카오 주소·건물·장소 검색, 기준 주소 마커와 주변 생활시설 10종, 300m·500m·1km 필터
@@ -136,5 +138,7 @@ node scripts/check-client-secrets.cjs
 ```
 
 브라우저 테스트는 설치된 Google Chrome을 사용하며 실제 카카오 키·허용 도메인·외부 네트워크가 필요합니다. `npm test`에는 실제 주소 3곳을 조회하는 통합 테스트가 포함됩니다. `test-results/screens/`에 반응형 스크린샷, `test-results/kakao-live-1.png`~`3.png`에 실제 지도 스크린샷을 생성합니다. 비밀 키 검사는 빌드 후 `.next/static`에서 설정된 서버 키 값이 포함되는지 검사하며 값 자체는 출력하지 않습니다.
+
+실제 배포 검증은 PowerShell에서 `$env:PRODUCTION_URL='https://배포주소'`를 설정하고 `npm.cmd test -- tests/production.spec.ts`로 실행합니다. 지정하지 않으면 이 3개 검사는 건너뜁니다. 실제 API·AI를 호출하고 격리된 익명 세션에 임시 저장한 주소·메모·요약은 검사 후 삭제합니다. ODsay 한도 오류는 성공 경로로 집계하지 않습니다.
 
 최신 시설 연결 결과는 [FACILITIES_REPORT.md](./FACILITIES_REPORT.md), 이전 카카오 지도 연결 기록은 [KAKAO_MAP_REPORT.md](./KAKAO_MAP_REPORT.md)를 참고하세요. 시설 검증에는 실제 API 10종 × 3개 반경, 실제 마커 클릭/거리/PC·모바일 필터와 오류·빈 결과·늦은 응답·10개 토글 검사가 포함됩니다. 실제 조회 결과 표는 `test-results/**/real-facility-results.json`, 화면은 `test-results/facilities-live-desktop.png`와 `facilities-live-mobile.png`에 생성됩니다.

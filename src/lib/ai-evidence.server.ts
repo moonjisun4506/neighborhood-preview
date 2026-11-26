@@ -11,7 +11,7 @@ export function validateSummaryRequest(value:unknown):value is SummaryRequest{
   return Array.isArray(v.addresses)&&v.addresses.length>=1&&v.addresses.length<=3&&new Set(v.addresses.map(a=>a?.id)).size===v.addresses.length&&v.addresses.every(a=>validAddress(a)&&a.source==='kakao'&&validCoordinates(a.coordinates))&&[300,500,1000].includes(v.radius)&&(v.destination===null||(validAddress(v.destination)&&v.destination.source==='kakao'&&validCoordinates(v.destination.coordinates)))&&Number.isInteger(v.days)&&v.days>=0&&v.days<=31&&typeof v.roundTrip==='boolean'&&rentMonths().includes(v.month)&&Object.hasOwn(housingTypes,v.type)&&Number.isSafeInteger(v.min)&&v.min>=0&&(v.max===null||(Number.isSafeInteger(v.max)&&v.max>=v.min))&&Array.isArray(v.transit)&&v.transit.length<=3;
 }
 function same(a:unknown,b:{lat:number;lng:number}){return validCoordinates(a)&&Math.abs(a.lat-b.lat)<1e-7&&Math.abs(a.lng-b.lng)<1e-7;}
-function fresh(value:unknown){return typeof value==='string'&&Number.isFinite(Date.parse(value))&&Date.now()-Date.parse(value)>=-60000&&Date.now()-Date.parse(value)<15*60*1000;}
+function fresh(value:unknown){return typeof value==='string'&&Number.isFinite(Date.parse(value))&&Date.now()-Date.parse(value)>=-60000&&Date.now()-Date.parse(value)<24*60*60*1000;}
 function cleanNearby(value:TransitNearby|null,origin:{lat:number;lng:number},radius:number):TransitNearby|null{
   if(!value||value.provider!=='odsay'||!same(value.origin,origin)||value.radius!==radius||!fresh(value.fetchedAt)||!Array.isArray(value.stations)||value.stations.length>500)return null;
   const stations=value.stations.filter(s=>s&&['bus','subway'].includes(s.kind)&&typeof s.name==='string'&&s.name.length<=100&&validCoordinates(s.coordinates)&&straightLineDistance(origin,s.coordinates)<=radius).map(s=>({...s,distanceMeters:straightLineDistance(origin,s.coordinates)})).sort((a,b)=>a.distanceMeters-b.distanceMeters);
@@ -54,7 +54,23 @@ export async function collectEvidence(input:SummaryRequest){
     else add('rent',`${prefix}지역 월세 정보 없음. 실거래 조회 자료가 없어 월세·보증금·거래 건수를 추정하지 않습니다.`,'월세 자료 미확인');
     if(!available.length)add('benefits',`${prefix}생활 편의성을 설명할 시설 근거가 부족합니다. 추가 조회와 현장 확인이 필요합니다.`,'근거 부족 안내');
     if(missing)add('checks',`${prefix}생활시설 ${missing}개 종류의 조회에 실패했습니다. 미조회 항목은 다시 확인해 주세요.`,'조회 상태');
-    try{const noise=await nearbyNoise(address.coordinates!,input.radius);for(const point of noise.points.slice(0,2))add('checks',`${prefix}공식 소음 측정 지점 ${point.name}(선택 주소에서 직선 약 ${Math.round(point.distanceMeters)}m)의 ${point.measuredPeriod} 자료: ${point.metrics.map(m=>`${m.label} ${m.db} dB`).join(', ')}. 출처: ${point.source} (${point.sourceUrl}). 측정 지점의 과거 참고값으로, 이 집의 실제 소음·위험 등급이 아닙니다.`,'국가소음정보시스템 공식 측정자료');}catch{/* Missing or failed noise observations never become inferred noise values. */}
+    let noisePoint:import('./noise').NoisePoint|undefined;
+    try{const noise=await nearbyNoise(address.coordinates!,input.radius);noisePoint=noise.points[0];for(const point of noise.points.slice(0,2))add('checks',`${prefix}공식 소음 측정 지점 ${point.name}(선택 주소에서 직선 약 ${Math.round(point.distanceMeters)}m)의 ${point.measuredPeriod} 자료: ${point.metrics.map(m=>`${m.label} ${m.db} dB`).join(', ')}. 출처: ${point.source} (${point.sourceUrl}). 측정 지점의 과거 참고값으로, 이 집의 실제 소음·위험 등급이 아닙니다.`,'국가소음정보시스템 공식 측정자료');}catch{/* Missing or failed noise observations never become inferred noise values. */}
+    if(input.addresses.length===1){
+      const brief=(section:SectionKey,text:string,source:string)=>add(section,text,'간단 요약 · '+source);
+      brief('overview',`${address.address} 주변 반경 ${input.radius}m의 조회 자료를 정리했으며, 거주 적합성이나 주소 순위를 판단하지 않습니다.`,'선택 주소');
+      if(available.length){for(const f of available){const nearest=[...f.data!.places].sort((a,b)=>a.distanceMeters-b.distanceMeters)[0];brief('facilities',`조회된 ${f.label} 중 가장 가까운 ${nearest.name}은 직선 약 ${Math.round(nearest.distanceMeters)}m에 있으며, 실제 보행 동선과 운영시간은 별도 확인이 필요합니다.`,'카카오 실제 시설 조회');}}
+      else brief('facilities','주변 생활시설 정보가 부족해 생활 편의성을 확인할 수 없습니다.','시설 자료 미확인');
+      const station=nearby?.stations[0];
+      const observedAt=routes?.fetchedAt??nearby?.fetchedAt;
+      const observed=observedAt?` (${new Date(observedAt).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'})} 조회)` : '';
+      const tripCost=out?monthlyTransportCost(out.fare,back?.fare??null,input.days,true):null;
+      brief('transit',`${station?`가까운 ${station.kind==='bus'?'버스정류장':'지하철역'}은 ${station.name}(직선 약 ${Math.round(station.distanceMeters)}m)이며, `:''}${out?`등록 목적지까지 조회 경로 중 최단 ${out.minutes}분이고 월 ${input.days}일 왕복 비용은 ${tripCost===null?'정보 없음':tripCost.toLocaleString('ko-KR')+'원'}`:'학교·직장 경로와 교통비는 정보 없음으로, 교통 탭에서 직접 조회가 필요합니다'}${observed}${out?'이며 실제 운행과 비용은 달라질 수 있습니다':''}.`,'ODsay 조회 자료·입력 일수');
+      const rent=data.rent;
+      brief('rent',rent?`${rent.region.name} ${rent.month} ${housingTypes[rent.type]} 월세 거래 ${rent.statistics.count}건의 중앙값은 ${rent.statistics.medianRent===null?'정보 없음':rent.statistics.medianRent.toLocaleString('ko-KR')+'만원'}이며, ${rent.statistics.smallSample?'표본이 5건 미만인 ':''}지역 참고 통계로 개별 집의 월세가 아닙니다.`:'지역 월세 실거래 자료가 없어 주거비는 별도 확인이 필요합니다.','국토교통부 지역 참고 통계');
+      brief('benefits',noisePoint?`${noisePoint.source}의 ${noisePoint.name}(직선 약 ${Math.round(noisePoint.distanceMeters)}m), ${noisePoint.measuredPeriod} 측정값은 ${noisePoint.metrics.map(m=>m.label+' '+m.db+' dB').join(' / ')}이며 집 자체의 소음이 아닙니다.`:'해당 주소의 소음 정보는 확인할 수 없습니다.','공식 소음 측정자료·조회 한계');
+      brief('checks','소음·치안은 추정할 수 없으며, 계약 전 채광·관리비·관리 상태와 실제 통학 시간대의 동선을 직접 확인해 주세요.','추가 확인 안내');
+    }
   }
   if(input.addresses.length>1){add('overview','선택한 주소들의 같은 조건에서 조회된 시설·교통·월세 정보를 비교했습니다. 주소의 순위나 거주 적합성은 판단하지 않습니다.','공통 비교 조건');
     for(let c=0;c<facilityCategories.length;c++){if(all.every(d=>d.facilities[c].data))add('facilities',`${facilityCategories[c][1]}의 같은 반경 내 조회 건수는 ${input.addresses.map((a,i)=>`${a.address} ${all[i].facilities[c].data!.places.length}곳`).join(', ')}입니다. 검색에 반환된 건수 차이이며 지역의 우열을 의미하지 않습니다.`,'카카오 동일 조건 비교');}}
