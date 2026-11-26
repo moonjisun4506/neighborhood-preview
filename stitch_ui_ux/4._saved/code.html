@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+
+<html lang="ko"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"on-background":"#0d1c2e","error":"#ba1a1a","surface":"#f8f9ff","on-primary-container":"#86af99","on-surface":"#0d1c2e","tertiary-container":"#612e00","surface-dim":"#ccdbf3","on-secondary-fixed-variant":"#005235","surface-variant":"#d5e3fc","surface-tint":"#3f6653","surface-bright":"#f8f9ff","inverse-on-surface":"#eaf1ff","primary-container":"#1b4332","on-tertiary-container":"#ff8611","on-tertiary-fixed-variant":"#713700","on-tertiary-fixed":"#301400","surface-container-lowest":"#ffffff","on-primary":"#ffffff","on-primary-fixed-variant":"#274e3d","on-primary-fixed":"#002114","surface-container-highest":"#d5e3fc","tertiary-fixed-dim":"#ffb784","primary-fixed-dim":"#a5d0b9","primary-fixed":"#c1ecd4","outline":"#717973","outline-variant":"#c1c8c2","secondary-container":"#92f7c3","secondary":"#006c48","on-surface-variant":"#414844","secondary-fixed":"#92f7c3","on-secondary-container":"#00734d","tertiary-fixed":"#ffdcc6","inverse-primary":"#a5d0b9","on-error-container":"#93000a","background":"#f8f9ff","surface-container-high":"#dce9ff","on-secondary":"#ffffff","on-tertiary":"#ffffff","inverse-surface":"#233144","primary":"#012d1d","surface-container":"#e6eeff","surface-container-low":"#eff4ff","error-container":"#ffdad6","secondary-fixed-dim":"#75daa8","tertiary":"#401c00","on-error":"#ffffff","on-secondary-fixed":"#002113"},borderRadius:{DEFAULT:"0.25rem",lg:"0.5rem",xl:"0.75rem",full:"9999px"},spacing:{"space-lg":"1rem","space-3xl":"3rem",margin:"1rem","space-xl":"1.5rem","space-sm":"0.5rem",gutter:"1rem","margin-desktop":"2rem","gutter-desktop":"1.5rem","space-md":"0.75rem","space-xs":"0.25rem","margin-tablet":"1.5rem","space-2xl":"2rem"},fontFamily:{"label-sm":["Plus Jakarta Sans"],"label-md":["Plus Jakarta Sans"],"body-sm":["Plus Jakarta Sans"],"body-xs":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"],"body-lg":["Plus Jakarta Sans"],"headline-sm":["Plus Jakarta Sans"],"headline-md":["Plus Jakarta Sans"],"headline-xl-mobile":["Plus Jakarta Sans"],"body-md":["Plus Jakarta Sans"],"headline-xl":["Plus Jakarta Sans"]},fontSize:{"label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"500"}],"label-md":["12px",{lineHeight:"16px",letterSpacing:"0.01em",fontWeight:"600"}],"body-sm":["14px",{lineHeight:"20px",letterSpacing:"0em",fontWeight:"400"}],"body-xs":["13px",{lineHeight:"18px",letterSpacing:"0em",fontWeight:"500"}],"headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"700"}],"body-lg":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"400"}],"headline-sm":["18px",{lineHeight:"26px",letterSpacing:"-0.01em",fontWeight:"600"}],"headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],"headline-xl-mobile":["24px",{lineHeight:"32px",letterSpacing:"-0.02em",fontWeight:"700"}],"body-md":["15px",{lineHeight:"22px",letterSpacing:"-0.005em",fontWeight:"400"}],"headline-xl":["28px",{lineHeight:"36px",letterSpacing:"-0.02em",fontWeight:"700"}]}}}}</script></head><body class="bg-surface font-body-md text-on-surface antialiased selection:bg-secondary-fixed selection:text-on-secondary-fixed"><header class="fixed top-0 left-0 w-full z-50 bg-surface-container-lowest/95 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 max-w-7xl mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-md shrink-0"><div class="flex items-center gap-space-xs"><div class="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center"><span class="material-symbols-outlined text-secondary-fixed text-[20px]">explore</span></div><span class="font-headline-sm text-headline-sm text-primary tracking-tight font-bold">동네 미리보기</span></div><span class="hidden xl:inline-flex items-center px-space-sm py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">청년·초년생 안심 대시보드</span></div><nav class="hidden lg:flex items-center gap-space-xs p-1 rounded-xl bg-surface-container-low" data-active-classes="bg-primary-container text-on-primary font-semibold shadow-sm"><a class="px-space-md py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-all duration-150" data-path="home" href="#">홈 온보딩</a><a class="px-space-md py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-all duration-150" data-path="neighborhood-exploration" href="#">동네 탐색</a><a class="px-space-md py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-all duration-150" data-path="ai-neighborhood-recommendations" href="#">AI 동네 추천</a><a aria-current="page" class="px-space-md py-1.5 rounded-lg transition-all duration-150 bg-primary-container text-on-primary font-semibold shadow-sm" data-path="saved-neighborhoods" href="#">저장한 동네</a><a class="px-space-md py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-all duration-150" data-path="neighborhood-comparison" href="#">동네 비교</a></nav><div class="flex items-center gap-space-sm shrink-0"><div class="hidden sm:flex items-center gap-space-xs px-space-md py-1.5 rounded-full bg-secondary-fixed/50 hover:bg-secondary-fixed transition-colors"><span class="material-symbols-outlined text-on-secondary-fixed-variant text-[18px]">near_me</span><span class="font-label-md text-label-md text-on-secondary-fixed-variant font-semibold">홍익대 정문 25분</span></div><button aria-label="알림 목록" class="w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors relative" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-on-tertiary-container ring-2 ring-surface-container-lowest"></span></button><div class="flex items-center gap-space-sm pl-space-xs"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div><span class="hidden md:inline font-body-xs text-body-xs font-semibold text-on-surface">김서연 님</span></div></div></div></header><main class="w-full pt-16 bg-surface min-h-[calc(100vh-16rem)]"><div class="flex flex-col w-full pb-28">
+<!-- Top Ambient Glow (Contained) -->
+<div class="relative w-full overflow-hidden">
+<div class="absolute -top-24 left-1/4 w-96 h-96 rounded-full bg-secondary-fixed/40 blur-3xl pointer-events-none"></div>
+<div class="absolute -top-16 right-1/4 w-80 h-80 rounded-full bg-surface-variant/60 blur-3xl pointer-events-none"></div>
+<div class="relative max-w-7xl mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop pt-8 pb-6">
+<!-- Breadcrumb & Status Tracker -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm mb-4">
+<div class="flex items-center gap-space-xs font-label-md text-label-md text-on-surface-variant">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-secondary">bookmark_added</span>
+            관심 동네 보관함
+          </span>
+<span class="text-outline-variant">/</span>
+<span class="text-on-surface font-semibold">임장 일지 &amp; 비교 풀</span>
+</div>
+<div class="flex items-center gap-space-xs px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm">
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+<span>공공데이터 동기화 완료: 오늘 09:30 기준</span>
+</div>
+</div>
+<!-- Main Section Header & Floating Action Group -->
+<div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-space-lg">
+<div class="flex flex-col gap-space-xs max-w-3xl">
+<div class="flex items-center gap-space-sm">
+<span class="px-2.5 py-1 rounded-lg bg-primary-container text-secondary-fixed font-label-md text-label-md uppercase tracking-wider">Saved Dossier</span>
+<span class="font-label-md text-label-md text-secondary font-bold">3개 동네 보관 중</span>
+</div>
+<h1 class="font-headline-xl text-headline-xl text-primary font-bold tracking-tight">
+            관심 동네 보관함 &amp; 임장 일지
+          </h1>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+            계약 전 꼼꼼히 기록하고, AI에게 핵심 장단점 요약을 요청해 보세요. 2곳 이상 선택하면 다차원 심층 비교가 가능합니다.
+          </p>
+</div>
+<!-- Desktop Quick Action -->
+<div class="flex items-center gap-space-sm shrink-0">
+<button class="group px-space-xl py-3 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md font-semibold transition-all duration-200 shadow-sm hover:shadow-md flex items-center gap-space-sm" id="topCompareBtn" type="button">
+<span class="material-symbols-outlined text-secondary-fixed text-[20px] group-hover:rotate-12 transition-transform">compare_arrows</span>
+<span>선택한 동네 비교하기</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-bold text-label-sm" id="topCompareCountBadge">2곳 선택됨</span>
+</button>
+</div>
+</div>
+<!-- Live Filter / Sort Tabs -->
+<div class="flex flex-wrap items-center justify-between gap-space-md mt-8 pt-4 bg-surface-container-lowest/80 backdrop-blur-sm px-space-lg py-space-sm rounded-2xl shadow-sm">
+<div class="flex items-center gap-space-xs overflow-x-auto">
+<button class="px-space-md py-1.5 rounded-full bg-primary-container text-on-primary font-label-md text-label-md font-semibold" type="button">전체 목록 (3)</button>
+<button class="px-space-md py-1.5 rounded-full bg-surface-container text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors" type="button">임장 메모 완료 (2)</button>
+<button class="px-space-md py-1.5 rounded-full bg-surface-container text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors" type="button">AI 요약 대기 (1)</button>
+</div>
+<div class="flex items-center gap-space-sm text-on-surface-variant font-label-md text-label-md">
+<span class="text-outline">정렬:</span>
+<button class="text-primary font-semibold flex items-center gap-0.5" type="button">매칭률 높은 순 <span class="material-symbols-outlined text-[16px]">arrow_drop_down</span></button>
+</div>
+</div>
+</div>
+</div>
+<!-- Neighborhood Dossier Cards Container -->
+<div class="max-w-7xl mx-auto w-full px-margin md:px-margin-tablet lg:px-margin-desktop mt-4 space-y-space-xl">
+<!-- CARD 1: 마포구 망원1동 (Selected) -->
+<article class="relative w-full rounded-2xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-all duration-200 p-space-lg lg:p-space-xl group" data-card-id="mangwon">
+<!-- Active Accent Pill Line -->
+<div class="absolute left-0 top-6 bottom-6 w-1.5 rounded-r bg-secondary"></div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl">
+<!-- Left: Imagery & Core Metric Meta (4 Cols) -->
+<div class="lg:col-span-4 flex flex-col gap-space-md">
+<div class="relative w-full h-52 sm:h-60 rounded-xl overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="Peaceful and cozy residential alleyway in Mangwon-dong, Seoul, during late golden afternoon sunlight. Clean paved pedestrian street with small artisanal cafes, convenience store signs, bright street lamps, bicycles parked neatly, calm and safe neighborhood mood, soft natural lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAv6zc01Eex0iLHj9k4kdo9s44OwsIQA6wIffFVxaTuk_uMfdRTVEMXlhVJ5cblBJshpy1UzTeHA8_KOjwClX3_zdScg8n6rdDWHdwRYk4EHU2ENGhVyB-vqUcdf82QbWu9czaDEIp1HDYx-wUKLhv6KpMgZH4Pgh5zS68VRY3YErUoVGftOonclymGXvib4b2Q7gbE7ieIst1CAIoXISlQy2S1EGPErQ8rWHIQGll1"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-black/20"></div>
+<!-- Checkbox Overlay -->
+<label class="absolute top-3 left-3 flex items-center gap-2 cursor-pointer z-10 bg-surface-container-lowest/90 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm hover:bg-surface-container-lowest transition-colors">
+<input checked="" class="w-4 h-4 rounded text-secondary focus:ring-secondary accent-primary cursor-pointer" onchange="handleSelectionChange(this, 'mangwon')" type="checkbox"/>
+<span class="font-label-md text-label-md text-on-surface font-bold">비교함 담기</span>
+</label>
+<!-- Match Score Badge -->
+<div class="absolute top-3 right-3 flex items-center gap-1 px-3 py-1 rounded-full bg-secondary text-on-secondary font-label-md text-label-md font-bold shadow-sm">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+<span>서연 님 매칭 96%</span>
+</div>
+<!-- Bottom Floating Quick Spec Inside Image -->
+<div class="absolute bottom-3 left-3 right-3 flex items-center justify-between text-on-primary">
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-black/40 backdrop-blur-sm">망원역 도보 6분</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-secondary/80 backdrop-blur-sm font-semibold">1인가구 안심길</span>
+</div>
+</div>
+<!-- Micro Metric Grid -->
+<div class="grid grid-cols-2 gap-space-sm">
+<div class="p-3 rounded-xl bg-surface-container-low flex flex-col gap-0.5">
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px] text-secondary">commute</span>
+                통학 시간
+              </span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold">22분 소요</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">홍익대 정문 도보·지하철</span>
+</div>
+<div class="p-3 rounded-xl bg-surface-container-low flex flex-col gap-0.5">
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px] text-tertiary">payments</span>
+                평균 시세
+              </span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold">1,000 / 60만</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">원룸·다세대 (전용 20㎡)</span>
+</div>
+</div>
+</div>
+<!-- Right: Neighborhood Title, User Note, AI Dossier (8 Cols) -->
+<div class="lg:col-span-8 flex flex-col justify-between gap-space-lg">
+<div class="flex flex-col gap-space-md">
+<!-- Header Row -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+<div>
+<div class="flex items-center gap-2">
+<h2 class="font-headline-lg text-headline-lg text-primary font-bold">마포구 망원1동</h2>
+<span class="px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant font-label-sm text-label-sm font-semibold">망리단길 이면 주택가</span>
+</div>
+<p class="font-body-xs text-body-xs text-on-surface-variant mt-0.5">서울특별시 마포구 포은로 일대 · 치안센터 180m 인근</p>
+</div>
+<!-- Quick Meta Tags -->
+<div class="flex items-center gap-1">
+<span class="inline-flex items-center px-2 py-1 rounded bg-surface-container-high text-on-surface font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px] text-secondary mr-1">wb_twilight</span>
+                  야간 조도 8.4 lux
+                </span>
+<span class="inline-flex items-center px-2 py-1 rounded bg-surface-container-high text-on-surface font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px] text-primary mr-1">storefront</span>
+                  편의점 4곳 (100m내)
+                </span>
+</div>
+</div>
+<!-- User Field Inspection Memo Box (User Written) -->
+<div class="rounded-xl bg-surface-container-low p-space-md relative group/memo transition-all hover:bg-surface-container">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-space-xs font-label-md text-label-md text-primary font-bold">
+<span class="material-symbols-outlined text-[18px] text-secondary">draw</span>
+<span>서연 님의 현장 임장 메모</span>
+<span class="text-outline font-normal text-label-sm">| 10월 21일 (토) 15:20 작성</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="text-on-surface-variant hover:text-primary font-label-sm text-label-sm px-2 py-0.5 rounded hover:bg-surface-container-lowest transition-colors flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[14px]">edit</span>수정
+                  </button>
+<button class="text-outline hover:text-error font-label-sm text-label-sm px-2 py-0.5 rounded hover:bg-error-container/30 transition-colors flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[14px]">delete</span>삭제
+                  </button>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface leading-relaxed whitespace-pre-line">
+                "지난주 토요일 오후에 직접 가봤음. 망리단길 쪽은 사람 많지만 2블록 안쪽 주택가는 생각보다 엄청 조용함! 가로등 밝고 편의점 바로 앞이라 밤에도 안심될 듯. 보증금 1000/60 매물 위주로 직방/다방 알림 걸어두기."
+              </p>
+<div class="mt-2.5 pt-2 flex flex-wrap items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm">
+<span class="px-2 py-0.5 rounded-full bg-surface-container-lowest font-medium text-secondary">#골목길소음적음</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-lowest font-medium text-secondary">#여성안심귀갓길</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-lowest font-medium text-secondary">#망원시장도보5분</span>
+</div>
+</div>
+<!-- AI Lifestyle & Location Analysis Box -->
+<div class="rounded-xl bg-surface-variant/40 p-space-md flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs font-label-md text-label-md text-primary font-bold">
+<span class="material-symbols-outlined text-[18px] text-tertiary">smart_toy</span>
+<span>AI 입지 &amp; 라이프스타일 종합 요약</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">김서연 님(대학생/도보·지하철 위주) 맞춤 분석</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md mt-1">
+<div class="flex items-start gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-secondary shrink-0 mt-0.5">add_circle</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-primary font-bold">강점 요약</span>
+<p class="font-body-xs text-body-xs text-on-surface-variant leading-snug">
+                      홍익대까지 환승 없이 22분 도착 가능. 망원시장과 1인가구 맞춤 반찬가게가 밀집되어 생활비 방어 및 식사 편의성 최고 수준.
+                    </p>
+</div>
+</div>
+<div class="flex items-start gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-tertiary shrink-0 mt-0.5">warning</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-tertiary font-bold">유의점 요약</span>
+<p class="font-body-xs text-body-xs text-on-surface-variant leading-snug">
+                      금·토 야간에 상권 유입 유동인구가 있어 골목 입구 50m 구간 차량 진출입 주의 필요. 반지하/노후 빌라는 습기 사전 점검 권장.
+                    </p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Action Buttons inside Card -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm pt-2">
+<div class="flex items-center gap-space-sm">
+<a class="inline-flex items-center gap-1.5 px-space-md py-2 rounded-xl bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors font-label-md text-label-md font-semibold" href="#">
+<span class="material-symbols-outlined text-secondary text-[18px]">map</span>
+                지도에서 안심경로 &amp; 상권보기
+              </a>
+<button class="inline-flex items-center gap-1.5 px-space-md py-2 rounded-xl bg-surface-container-lowest text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md" type="button">
+<span class="material-symbols-outlined text-[18px]">history</span>
+                실거래 변동 추이
+              </button>
+</div>
+<button class="inline-flex items-center gap-1 px-space-md py-2 rounded-xl text-tertiary hover:bg-tertiary-fixed/30 transition-colors font-label-md text-label-md font-semibold" type="button">
+<span class="material-symbols-outlined text-[18px]">sync</span>
+              AI 재분석 요청
+            </button>
+</div>
+</div>
+</div>
+</article>
+<!-- CARD 2: 은평구 응암동 (Selected) -->
+<article class="relative w-full rounded-2xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-all duration-200 p-space-lg lg:p-space-xl group" data-card-id="eungam">
+<!-- Active Accent Pill Line -->
+<div class="absolute left-0 top-6 bottom-6 w-1.5 rounded-r bg-secondary"></div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl">
+<!-- Left: Imagery & Core Metric Meta -->
+<div class="lg:col-span-4 flex flex-col gap-space-md">
+<div class="relative w-full h-52 sm:h-60 rounded-xl overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="Quiet and clean riverfront residential walk in Eungam-dong near Saejeol station along Bulgwangcheon stream. Modern riverside jogging trail, green willows, cozy low-rise apartments, peaceful evening twilight glow, calm atmosphere ideal for students." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMeCvn-sx0UQTmUoUqEiILQjX-28zbSmftrDuVxoAex6wqpQjXnphJ5sUXsWgkeK0UloOBnB2-wZ_oeYepWR3xSNuc5nat-vRzh1r7kt0xkFVNp9hwwM2lXG9aKfllBjXW8RMeGkjC8xqz9iLUOa2Z2h3P-jSCU5qrKLifEAK_Uv8QFUH5e7ciAeUx0lagNg0qn5HrjBDocYEjqcAfYi6kesAp21wqZOopTCRWHCUt"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-black/20"></div>
+<!-- Checkbox Overlay -->
+<label class="absolute top-3 left-3 flex items-center gap-2 cursor-pointer z-10 bg-surface-container-lowest/90 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm hover:bg-surface-container-lowest transition-colors">
+<input checked="" class="w-4 h-4 rounded text-secondary focus:ring-secondary accent-primary cursor-pointer" onchange="handleSelectionChange(this, 'eungam')" type="checkbox"/>
+<span class="font-label-md text-label-md text-on-surface font-bold">비교함 담기</span>
+</label>
+<!-- Match Score Badge -->
+<div class="absolute top-3 right-3 flex items-center gap-1 px-3 py-1 rounded-full bg-secondary text-on-secondary font-label-md text-label-md font-bold shadow-sm">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+<span>서연 님 매칭 89%</span>
+</div>
+<!-- Quick Spec -->
+<div class="absolute bottom-3 left-3 right-3 flex items-center justify-between text-on-primary">
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-black/40 backdrop-blur-sm">새절역 도보 4분</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-secondary/80 backdrop-blur-sm font-semibold">가성비 월세 우수</span>
+</div>
+</div>
+<!-- Micro Metric Grid -->
+<div class="grid grid-cols-2 gap-space-sm">
+<div class="p-3 rounded-xl bg-surface-container-low flex flex-col gap-0.5">
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px] text-secondary">commute</span>
+                통학 시간
+              </span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold">25분 소요</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">6호선 새절역 직통</span>
+</div>
+<div class="p-3 rounded-xl bg-surface-container-low flex flex-col gap-0.5">
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px] text-tertiary">savings</span>
+                평균 시세
+              </span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold">1,000 / 48만</span>
+<span class="font-label-sm text-label-sm text-secondary font-semibold">망원 대비 -12만 절감</span>
+</div>
+</div>
+</div>
+<!-- Right: Neighborhood Title, User Note, AI Dossier -->
+<div class="lg:col-span-8 flex flex-col justify-between gap-space-lg">
+<div class="flex flex-col gap-space-md">
+<!-- Header Row -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+<div>
+<div class="flex items-center gap-2">
+<h2 class="font-headline-lg text-headline-lg text-primary font-bold">은평구 응암동</h2>
+<span class="px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant font-label-sm text-label-sm font-semibold">새절역 불광천변</span>
+</div>
+<p class="font-body-xs text-body-xs text-on-surface-variant mt-0.5">서울특별시 은평구 증산로 일대 · 불광천 산책로 70m</p>
+</div>
+<div class="flex items-center gap-1">
+<span class="inline-flex items-center px-2 py-1 rounded bg-surface-container-high text-on-surface font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px] text-secondary mr-1">directions_run</span>
+                  불광천 러닝길 인접
+                </span>
+<span class="inline-flex items-center px-2 py-1 rounded bg-surface-container-high text-on-surface font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px] text-primary mr-1">security</span>
+                  CCTV 14대 관제
+                </span>
+</div>
+</div>
+<!-- User Field Inspection Memo Box -->
+<div class="rounded-xl bg-surface-container-low p-space-md relative group/memo transition-all hover:bg-surface-container">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-space-xs font-label-md text-label-md text-primary font-bold">
+<span class="material-symbols-outlined text-[18px] text-secondary">draw</span>
+<span>서연 님의 현장 임장 메모</span>
+<span class="text-outline font-normal text-label-sm">| 10월 23일 (월) 21:05 작성</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="text-on-surface-variant hover:text-primary font-label-sm text-label-sm px-2 py-0.5 rounded hover:bg-surface-container-lowest transition-colors flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[14px]">edit</span>수정
+                  </button>
+<button class="text-outline hover:text-error font-label-sm text-label-sm px-2 py-0.5 rounded hover:bg-error-container/30 transition-colors flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[14px]">delete</span>삭제
+                  </button>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface leading-relaxed whitespace-pre-line">
+                "월세가 망원동보다 12만원이나 싸서 식비/저축 여유 생길 것 같음. 6호선 한 번에 상수역 가니까 환승 스트레스 없음. 이번 주 금요일 저녁에 퇴근길 분위기 보러 갈 예정."
+              </p>
+<div class="mt-2.5 pt-2 flex flex-wrap items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm">
+<span class="px-2 py-0.5 rounded-full bg-surface-container-lowest font-medium text-secondary">#월세12만원세이브</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-lowest font-medium text-secondary">#6호선직통</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-lowest font-medium text-secondary">#불광천산책로</span>
+</div>
+</div>
+<!-- AI Lifestyle & Location Analysis Box -->
+<div class="rounded-xl bg-surface-variant/40 p-space-md flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs font-label-md text-label-md text-primary font-bold">
+<span class="material-symbols-outlined text-[18px] text-tertiary">smart_toy</span>
+<span>AI 입지 &amp; 라이프스타일 종합 요약</span>
+</div>
+<span class="font-label-sm text-label-sm text-secondary font-semibold">가성비 지수 1위 후보</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md mt-1">
+<div class="flex items-start gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-secondary shrink-0 mt-0.5">add_circle</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-primary font-bold">강점 요약</span>
+<p class="font-body-xs text-body-xs text-on-surface-variant leading-snug">
+                      동일 스펙 대비 매월 약 12~15만원 주거비 절약 가능. 불광천 산책로가 연결되어 러닝 및 멘탈케어 여가 환경 우수. 6호선 상수역까지 14분 쾌적 이동.
+                    </p>
+</div>
+</div>
+<div class="flex items-start gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-tertiary shrink-0 mt-0.5">warning</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-tertiary font-bold">유의점 요약</span>
+<p class="font-body-xs text-body-xs text-on-surface-variant leading-snug">
+                      망원동에 비해 트렌디한 카페나 문화시설 인프라는 적은 편. 새절역에서 안쪽 주택가로 들어갈 때 경사도가 있는 골목 필지 사전 확인 필요.
+                    </p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Action Buttons inside Card -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm pt-2">
+<div class="flex items-center gap-space-sm">
+<a class="inline-flex items-center gap-1.5 px-space-md py-2 rounded-xl bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors font-label-md text-label-md font-semibold" href="#">
+<span class="material-symbols-outlined text-secondary text-[18px]">map</span>
+                지도에서 안심경로 &amp; 상권보기
+              </a>
+<button class="inline-flex items-center gap-1.5 px-space-md py-2 rounded-xl bg-surface-container-lowest text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md" type="button">
+<span class="material-symbols-outlined text-[18px]">directions_walk</span>
+                야간 현장 로드뷰 체크
+              </button>
+</div>
+<button class="inline-flex items-center gap-1 px-space-md py-2 rounded-xl text-tertiary hover:bg-tertiary-fixed/30 transition-colors font-label-md text-label-md font-semibold" type="button">
+<span class="material-symbols-outlined text-[18px]">sync</span>
+              AI 재분석 요청
+            </button>
+</div>
+</div>
+</div>
+</article>
+<!-- CARD 3: 서대문구 연희동 (Unchecked) -->
+<article class="relative w-full rounded-2xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-all duration-200 p-space-lg lg:p-space-xl group opacity-90 hover:opacity-100" data-card-id="yeonhui">
+<!-- Inactive Accent Indicator -->
+<div class="absolute left-0 top-6 bottom-6 w-1 rounded-r bg-surface-container-highest"></div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl">
+<!-- Left: Imagery & Core Metric Meta -->
+<div class="lg:col-span-4 flex flex-col gap-space-md">
+<div class="relative w-full h-52 sm:h-60 rounded-xl overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="Quiet and leafy residential neighborhood street in Yeonhui-dong, Seodaemun-gu, Seoul. Elegant red brick villas, small independent bookshop on the corner, tall green ginkgo trees lining the clean street, serene artistic atmosphere in midday light." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2jvz0y47NpZxllLJK2hXWypoEbHGc9hB9EdsLChIsC-jj1p7ZwiZmy4rk-poEWaBzNfIxvKnmFmcEggI5rYHaQ14byaVRQlM1I5_H5qgboKQfOFoD9HfsnrSau6RLb2PbRP1sCIrCSJlrH6VlgZjnchSzJAvS5AJu37cMuHx48UIqdX5m57EndTHq0FoYMUx2Rn_2ZZS5JiFRqG9UBtJsIrVw6Of8i2-mbxiPu9rD"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-black/20"></div>
+<!-- Checkbox Overlay -->
+<label class="absolute top-3 left-3 flex items-center gap-2 cursor-pointer z-10 bg-surface-container-lowest/90 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm hover:bg-surface-container-lowest transition-colors">
+<input class="w-4 h-4 rounded text-secondary focus:ring-secondary accent-primary cursor-pointer" onchange="handleSelectionChange(this, 'yeonhui')" type="checkbox"/>
+<span class="font-label-md text-label-md text-on-surface font-semibold">비교함 담기</span>
+</label>
+<!-- Match Score Badge -->
+<div class="absolute top-3 right-3 flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container-lowest/95 text-on-surface font-label-md text-label-md font-bold shadow-sm">
+<span class="material-symbols-outlined text-[16px] text-secondary">thumb_up</span>
+<span>서연 님 매칭 92%</span>
+</div>
+<!-- Quick Spec -->
+<div class="absolute bottom-3 left-3 right-3 flex items-center justify-between text-on-primary">
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-black/40 backdrop-blur-sm">신촌역 버스 7분</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-variant/90 text-on-surface font-semibold">조용한 주택가</span>
+</div>
+</div>
+<!-- Micro Metric Grid -->
+<div class="grid grid-cols-2 gap-space-sm">
+<div class="p-3 rounded-xl bg-surface-container-low flex flex-col gap-0.5">
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px] text-secondary">commute</span>
+                통학 시간
+              </span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold">18분 소요</span>
+<span class="font-label-sm text-label-sm text-secondary font-medium">후보 중 최단 거리</span>
+</div>
+<div class="p-3 rounded-xl bg-surface-container-low flex flex-col gap-0.5">
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px] text-tertiary">payments</span>
+                평균 시세
+              </span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold">1,000 / 54만</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">원룸·다세대 기준</span>
+</div>
+</div>
+</div>
+<!-- Right: Neighborhood Title, User Note Placeholder, AI Summary Request -->
+<div class="lg:col-span-8 flex flex-col justify-between gap-space-lg">
+<div class="flex flex-col gap-space-md">
+<!-- Header Row -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+<div>
+<div class="flex items-center gap-2">
+<h2 class="font-headline-lg text-headline-lg text-primary font-bold">서대문구 연희동</h2>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm font-semibold">남측 고즈넉한 주택가</span>
+</div>
+<p class="font-body-xs text-body-xs text-on-surface-variant mt-0.5">서울특별시 서대문구 연희로 일대 · 연희교차로 도보 5분</p>
+</div>
+<div class="flex items-center gap-1">
+<span class="inline-flex items-center px-2 py-1 rounded bg-surface-container-high text-on-surface font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px] text-secondary mr-1">volume_down</span>
+                  야간 평균 42dB (조용함)
+                </span>
+<span class="inline-flex items-center px-2 py-1 rounded bg-surface-container-high text-on-surface font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px] text-primary mr-1">local_cafe</span>
+                  로컬 베이커리/카페
+                </span>
+</div>
+</div>
+<!-- Empty Memo Input Form (Unwritten State) -->
+<div class="rounded-xl bg-surface-container-low/70 border-dashed border-2 border-outline-variant/60 p-space-md flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs font-label-md text-label-md text-on-surface-variant font-semibold">
+<span class="material-symbols-outlined text-[18px] text-outline">note_add</span>
+<span>현장 임장 메모 (아직 작성되지 않음)</span>
+</div>
+<span class="font-label-sm text-label-sm text-outline">발품 후 체크리스트 기록</span>
+</div>
+<div class="flex flex-col sm:flex-row gap-space-xs mt-1">
+<input class="w-full h-11 px-space-md rounded-xl bg-surface-container-lowest text-on-surface placeholder:text-outline text-body-sm focus:outline-none focus:ring-2 focus:ring-secondary/40" id="memoInputYeonhui" placeholder="현장 임장 후 느낀 점, 채광, 밤길 가로등 상태 등 메모를 남겨보세요..." type="text"/>
+<button class="px-space-lg h-11 rounded-xl bg-primary-container text-on-primary hover:bg-primary font-label-md text-label-md font-semibold shrink-0 transition-all flex items-center justify-center gap-1 shadow-sm" onclick="saveYeonhuiMemo()" type="button">
+<span class="material-symbols-outlined text-[18px]">save</span>
+<span>메모 저장</span>
+</button>
+</div>
+</div>
+<!-- AI Lifestyle & Location Analysis Box (Pending / Request State) -->
+<div class="rounded-xl bg-surface-container-low p-space-md flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
+<div class="flex items-start gap-space-sm">
+<div class="w-9 h-9 rounded-lg bg-surface-variant flex items-center justify-center shrink-0 text-primary">
+<span class="material-symbols-outlined text-[20px]">psychology</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-primary font-bold">AI 연희동 입지 &amp; 라이프스타일 요약 미실행</span>
+<p class="font-body-xs text-body-xs text-on-surface-variant">
+                    연희동의 보행 치안 지수와 학생 맞춤 버스 환승 노선 데이터를 취합하여 장단점을 생성합니다.
+                  </p>
+</div>
+</div>
+<button class="px-space-md py-2.5 rounded-xl bg-tertiary-fixed hover:bg-tertiary-fixed-dim text-on-tertiary-fixed font-label-md text-label-md font-bold shrink-0 transition-colors flex items-center gap-1.5 shadow-sm" id="aiExecBtn" onclick="triggerYeonhuiAiSummary()" type="button">
+<span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+<span>AI 장단점 요약 실행</span>
+</button>
+</div>
+</div>
+<!-- Bottom Action Buttons inside Card -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm pt-2">
+<div class="flex items-center gap-space-sm">
+<a class="inline-flex items-center gap-1.5 px-space-md py-2 rounded-xl bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors font-label-md text-label-md font-semibold" href="#">
+<span class="material-symbols-outlined text-secondary text-[18px]">map</span>
+                지도에서 안심경로 &amp; 상권보기
+              </a>
+<button class="inline-flex items-center gap-1.5 px-space-md py-2 rounded-xl bg-surface-container-lowest text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md" type="button">
+<span class="material-symbols-outlined text-[18px]">bookmark_remove</span>
+                보관함에서 삭제
+              </button>
+</div>
+<span class="font-label-sm text-label-sm text-outline">최근 업데이트: 3일 전</span>
+</div>
+</div>
+</div>
+</article>
+</div>
+<!-- Additional Insights Bento: Checklist & Field Tips for Renter -->
+<section class="max-w-7xl mx-auto w-full px-margin md:px-margin-tablet lg:px-margin-desktop mt-12">
+<div class="rounded-2xl bg-surface-container p-space-lg lg:p-space-xl">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md mb-6">
+<div>
+<span class="font-label-sm text-label-sm text-secondary font-bold uppercase tracking-wide">Field Guide Checklist</span>
+<h3 class="font-headline-md text-headline-md text-primary font-bold">서연 님의 성공적인 현장 임장(발품) 체크리스트</h3>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant font-label-md text-label-md">
+<span class="material-symbols-outlined text-[18px] text-secondary">task_alt</span>
+<span>진행 상황: 4 / 6 항목 확인 완료</span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+<!-- Item 1 -->
+<div class="p-space-md rounded-xl bg-surface-container-lowest shadow-sm flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="px-2 py-0.5 rounded bg-secondary-fixed text-on-secondary-fixed-variant font-label-sm text-label-sm font-semibold">치안 &amp; 조도</span>
+<span class="material-symbols-outlined text-secondary text-[18px]">check_circle</span>
+</div>
+<span class="font-headline-sm text-headline-sm text-on-surface">야간 귀갓길 가로등 확인</span>
+<p class="font-body-xs text-body-xs text-on-surface-variant">
+            밤 9시 이후 메인 도로에서 원룸 건물 현관까지 CCTV 사각지대와 가로등 작동 여부를 확인했습니다.
+          </p>
+</div>
+<!-- Item 2 -->
+<div class="p-space-md rounded-xl bg-surface-container-lowest shadow-sm flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="px-2 py-0.5 rounded bg-secondary-fixed text-on-secondary-fixed-variant font-label-sm text-label-sm font-semibold">소음 &amp; 상권</span>
+<span class="material-symbols-outlined text-secondary text-[18px]">check_circle</span>
+</div>
+<span class="font-headline-sm text-headline-sm text-on-surface">배달 오토바이 &amp; 골목 소음</span>
+<p class="font-body-xs text-body-xs text-on-surface-variant">
+            주택가 이면도로 주변 주점이나 배달 라이더 픽업 경로가 방 창문 바로 아래 있는지 체크했습니다.
+          </p>
+</div>
+<!-- Item 3 -->
+<div class="p-space-md rounded-xl bg-surface-container-lowest shadow-sm flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="px-2 py-0.5 rounded bg-tertiary-fixed text-on-tertiary-fixed-variant font-label-sm text-label-sm font-semibold">수압 &amp; 결로</span>
+<span class="material-symbols-outlined text-tertiary text-[18px]">pending</span>
+</div>
+<span class="font-headline-sm text-headline-sm text-on-surface">방문 시 싱크대 수압·창틀 실사</span>
+<p class="font-body-xs text-body-xs text-on-surface-variant">
+            다음 매물 방문 시 싱크대와 샤워기를 동시에 틀어 수압을 체크하고, 북향 창문 모서리 곰팡이 유무를 기록하세요.
+          </p>
+</div>
+</div>
+</div>
+</section>
+<!-- Floating Sticky Bottom Comparison Bar (Mandated by Prompt) -->
+<aside class="fixed bottom-4 left-0 right-0 z-40 max-w-5xl mx-auto px-margin md:px-margin-tablet" id="comparisonBottomBar">
+<div class="w-full bg-primary-container text-on-primary p-space-md rounded-2xl shadow-xl backdrop-blur-md flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
+<!-- Selection Status Info -->
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-xl bg-secondary-container text-on-secondary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[22px]">balance</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md text-secondary-fixed font-bold">비교함 현황:</span>
+<span class="font-headline-sm text-headline-sm text-on-primary font-bold" id="barSelectedCount">2곳 선택됨</span>
+</div>
+<div class="flex flex-wrap items-center gap-1.5 text-on-primary-container font-body-xs text-body-xs mt-0.5" id="barSelectedNames">
+<span class="px-2 py-0.5 rounded bg-primary text-secondary-fixed">마포구 망원1동</span>
+<span class="text-outline-variant">+</span>
+<span class="px-2 py-0.5 rounded bg-primary text-secondary-fixed">은평구 응암동</span>
+</div>
+</div>
+</div>
+<!-- Action Button Group -->
+<div class="flex items-center gap-space-sm shrink-0">
+<button class="px-space-md py-2.5 rounded-xl text-on-primary-container hover:text-on-primary hover:bg-primary transition-colors font-label-md text-label-md" onclick="clearAllSelections()" type="button">
+          선택 해제
+        </button>
+<a class="px-space-xl py-3 rounded-xl bg-secondary hover:bg-secondary-fixed text-on-secondary hover:text-on-secondary-fixed-variant font-label-md text-label-md font-bold transition-all shadow-md flex items-center gap-2" data-path="neighborhood-comparison" href="#">
+<span>선택한 2개 동네 한눈에 비교하기</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</aside>
+</div>
+<!-- Client Micro-Interactions Script -->
+<script>
+  // Simple reactive store for selected neighborhoods
+  const selectedNeighborhoods = {
+    mangwon: { name: '마포구 망원1동', selected: true },
+    eungam: { name: '은평구 응암동', selected: true },
+    yeonhui: { name: '서대문구 연희동', selected: false }
+  };
+
+  function updateBarUI() {
+    const activeKeys = Object.keys(selectedNeighborhoods).filter(k => selectedNeighborhoods[k].selected);
+    const count = activeKeys.length;
+    
+    // Update labels
+    const countText = count + '곳 선택됨';
+    document.getElementById('topCompareCountBadge').innerText = countText;
+    document.getElementById('barSelectedCount').innerText = countText;
+    
+    // Update bottom names container
+    const namesContainer = document.getElementById('barSelectedNames');
+    if (count === 0) {
+      namesContainer.innerHTML = '<span class="text-outline-variant">선택된 동네가 없습니다. 카드의 체크박스를 선택하세요.</span>';
+    } else {
+      namesContainer.innerHTML = activeKeys.map((k, i) => {
+        const item = selectedNeighborhoods[k];
+        return `<span class="px-2 py-0.5 rounded bg-primary text-secondary-fixed">${item.name}</span>` + 
+               (i < activeKeys.length - 1 ? '<span class="text-outline-variant">+</span>' : '');
+      }).join(' ');
+    }
+
+    // Toggle bottom bar visibility if none selected
+    const bar = document.getElementById('comparisonBottomBar');
+    if (count === 0) {
+      bar.classList.add('opacity-40', 'pointer-events-none');
+    } else {
+      bar.classList.remove('opacity-40', 'pointer-events-none');
+    }
+  }
+
+  function handleSelectionChange(checkbox, id) {
+    if (selectedNeighborhoods[id]) {
+      selectedNeighborhoods[id].selected = checkbox.checked;
+      updateBarUI();
+    }
+  }
+
+  function clearAllSelections() {
+    Object.keys(selectedNeighborhoods).forEach(k => {
+      selectedNeighborhoods[k].selected = false;
+    });
+    document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+    updateBarUI();
+  }
+
+  function saveYeonhuiMemo() {
+    const input = document.getElementById('memoInputYeonhui');
+    const text = input.value.trim();
+    if (!text) {
+      alert('메모 내용을 입력해 주세요.');
+      return;
+    }
+    const container = input.closest('div.rounded-xl');
+    container.classList.remove('border-dashed', 'border-2', 'border-outline-variant/60');
+    container.classList.add('bg-surface-container-low');
+    container.innerHTML = `
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-1 font-label-md text-label-md text-primary font-bold">
+          <span class="material-symbols-outlined text-[18px] text-secondary">draw</span>
+          <span>서연 님의 현장 임장 메모</span>
+          <span class="text-outline font-normal text-label-sm">| 방금 전 작성</span>
+        </div>
+        <button type="button" class="text-on-surface-variant hover:text-primary font-label-sm text-label-sm px-2 py-0.5 rounded hover:bg-surface-container-lowest transition-colors flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px]">edit</span>수정
+        </button>
+      </div>
+      <p class="font-body-sm text-body-sm text-on-surface leading-relaxed">"${text}"</p>
+      <div class="mt-2.5 pt-2 flex flex-wrap items-center gap-1 text-on-surface-variant font-label-sm text-label-sm">
+        <span class="px-2 py-0.5 rounded-full bg-surface-container-lowest font-medium text-secondary">#직접임장완료</span>
+        <span class="px-2 py-0.5 rounded-full bg-surface-container-lowest font-medium text-secondary">#남측주택가</span>
+      </div>
+    `;
+  }
+
+  function triggerYeonhuiAiSummary() {
+    const btn = document.getElementById('aiExecBtn');
+    btn.innerHTML = `<span class="material-symbols-outlined text-[18px] animate-spin">refresh</span><span>AI 분석 중...</span>`;
+    btn.disabled = true;
+
+    setTimeout(() => {
+      const parent = btn.closest('div.rounded-xl');
+      parent.className = "rounded-xl bg-surface-variant/40 p-space-md flex flex-col gap-space-xs transition-all";
+      parent.innerHTML = `
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-space-xs font-label-md text-label-md text-primary font-bold">
+            <span class="material-symbols-outlined text-[18px] text-tertiary">smart_toy</span>
+            <span>AI 입지 &amp; 라이프스타일 종합 요약</span>
+          </div>
+          <span class="font-label-sm text-label-sm text-secondary font-semibold">최신 데이터 반영됨</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-space-md mt-1">
+          <div class="flex items-start gap-space-xs">
+            <span class="material-symbols-outlined text-[18px] text-secondary shrink-0 mt-0.5">add_circle</span>
+            <div class="flex flex-col">
+              <span class="font-label-sm text-label-sm text-primary font-bold">강점 요약</span>
+              <p class="font-body-xs text-body-xs text-on-surface-variant leading-snug">
+                통학 거리 18분으로 3곳 중 가장 짧음. 고즈넉한 단독주택지 밀집으로 주거 안정감 및 소음 스트레스 최소화.
+              </p>
+            </div>
+          </div>
+          <div class="flex items-start gap-space-xs">
+            <span class="material-symbols-outlined text-[18px] text-tertiary shrink-0 mt-0.5">warning</span>
+            <div class="flex flex-col">
+              <span class="font-label-sm text-label-sm text-tertiary font-bold">유의점 요약</span>
+              <p class="font-body-xs text-body-xs text-on-surface-variant leading-snug">
+                지하철역(신촌·홍대입구) 도보 이용은 다소 멀어 시내버스 의존도 높음. 대형 마트 접근 시 신촌 방향 이동 필요.
+              </p>
+            </div>
+          </div>
+        </div>
+      `;
+    }, 900);
+  }
+</script></main><footer class="w-full bg-surface-container-lowest shadow-[0_-1px_6px_rgba(0,0,0,0.03)]"><div class="max-w-7xl mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop py-space-2xl"><div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-space-xl"><div class="flex flex-col gap-space-sm max-w-lg"><div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-primary text-[20px]">shield</span><span class="font-headline-sm text-headline-sm text-primary font-bold">동네 미리보기</span></div><p class="font-body-xs text-body-xs text-on-surface-variant leading-relaxed">국토교통부 실거래가 공개시스템, 경찰청 생활안전지도, 서울열린데이터광장 공공데이터를 기반으로 청년 및 사회초년생의 안전하고 투명한 자취 동네 탐색을 지원합니다.</p></div><div class="flex flex-wrap gap-space-xl text-on-surface-variant"><div class="flex flex-col gap-space-xs"><span class="font-label-md text-label-md text-on-surface font-semibold">공공데이터 출처</span><span class="font-body-xs text-body-xs text-on-surface-variant">국토교통부 연립·다세대 전월세 실거래가</span><span class="font-body-xs text-body-xs text-on-surface-variant">경찰청 전국 치안종합 및 CCTV 현황</span><span class="font-body-xs text-body-xs text-on-surface-variant">공간정보포털 보행·대중교통 접근성 지표</span></div><div class="flex flex-col gap-space-xs"><span class="font-label-md text-label-md text-on-surface font-semibold">법적 고지 &amp; 고객 안내</span><span class="font-body-xs text-body-xs text-on-surface-variant">본 서비스의 분석 지표는 참고용 추정치입니다.</span><span class="font-body-xs text-body-xs text-on-surface-variant">임대차 계약 체결 전 현장 실사 및 등기부등본 확인이 필수입니다.</span><span class="font-body-xs text-body-xs text-on-surface-variant">이용약관 · 개인정보처리방침</span></div></div></div><div class="mt-space-xl pt-space-md flex flex-col sm:flex-row items-center justify-between gap-space-sm font-label-sm text-label-sm text-on-surface-variant"><p>© 2025 동네 미리보기. All rights reserved.</p><p class="text-outline">청년 주거 안심 프로젝트 · Powered by Public Open Data API</p></div></div></footer></body></html>

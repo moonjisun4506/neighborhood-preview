@@ -1,0 +1,138 @@
+{
+  "files": [
+    {
+      "folder": "1._1",
+      "bytes": 37960,
+      "screenshot": false,
+      "images": 1,
+      "role": "selected",
+      "sha256": "72b32f60da45bf04f784cd257f0991a1fd5b601a731de1060b8a25559d9dcd81"
+    },
+    {
+      "folder": "1._2",
+      "bytes": 25011,
+      "screenshot": true,
+      "images": 1,
+      "role": "selected",
+      "sha256": "7d6de82eb01d2167b939fe1fe32ec39a4dcfbbe3e2719efe471d7703f4bff6f5"
+    },
+    {
+      "folder": "2._explore_1",
+      "bytes": 46718,
+      "screenshot": false,
+      "images": 3,
+      "role": "selected",
+      "sha256": "fc241406d0e629ae8c5aa2fa6b0439ee05c678581274434ab5507bc50b6e106e"
+    },
+    {
+      "folder": "2._explore_2",
+      "bytes": 25465,
+      "screenshot": true,
+      "images": 3,
+      "role": "selected",
+      "sha256": "82a9e598ff0e9474d3b7f4a26b2c642667690e3cf6c477988ca150d631931d73"
+    },
+    {
+      "folder": "3._ai_recommend",
+      "bytes": 43435,
+      "screenshot": true,
+      "images": 3,
+      "role": "selected",
+      "sha256": "ebe3cc6e0b97a3ca1cedd0878ce1d67dda178bcbd08a6bf0285edbc86a59393d"
+    },
+    {
+      "folder": "4._saved",
+      "bytes": 54479,
+      "screenshot": true,
+      "images": 3,
+      "role": "selected",
+      "sha256": "4589f061770d02fda3cee9ed4d1c6edb4f84b6fb5de1f0668c89b26d704f5a7c"
+    },
+    {
+      "folder": "5._compare",
+      "bytes": 53213,
+      "screenshot": true,
+      "images": 2,
+      "role": "selected",
+      "sha256": "2102dbd850f85f0f28567fd9c6e8e2dba3a35d4f86b6f8d23a3b1407dfc391e3"
+    },
+    {
+      "folder": "ai",
+      "bytes": 45744,
+      "screenshot": true,
+      "images": 4,
+      "role": "previous / alternative",
+      "sha256": "e81d6e611fba1117946d0552f7a4a3607a04cf860514e399bb99eda5e0d0cb9a"
+    },
+    {
+      "folder": "_1",
+      "bytes": 52700,
+      "screenshot": true,
+      "images": 3,
+      "role": "previous / alternative",
+      "sha256": "353f9aa34c7c8190ca587d153bac35bba3e337e890e10835e582ff9f90c8b692"
+    },
+    {
+      "folder": "_2",
+      "bytes": 42667,
+      "screenshot": true,
+      "images": 4,
+      "role": "previous / alternative",
+      "sha256": "72963558fff598506b9285573f2b0b2cb574b8565c2fe698fedc485aa7727b15"
+    },
+    {
+      "folder": "_3",
+      "bytes": 39713,
+      "screenshot": true,
+      "images": 3,
+      "role": "previous / alternative",
+      "sha256": "095153efeae6df7b3ff4a217a5b21bdcd644e35edb88168f82ac308522af3bdf"
+    },
+    {
+      "folder": "_4",
+      "bytes": 44941,
+      "screenshot": true,
+      "images": 3,
+      "role": "previous / alternative",
+      "sha256": "e583e510a17af25333c93db1f107cc02756d4ed149b4c322b828b133de06b8fc"
+    },
+    {
+      "folder": "_5",
+      "bytes": 34798,
+      "screenshot": true,
+      "images": 1,
+      "role": "previous / alternative",
+      "sha256": "3cd2acfc9000fc57e32b42847ffb95f64463e4491ad77a9e6458200269c03063"
+    }
+  ],
+  "assets": {
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuBqpFZmyhcUGmA4SOhG9-yg2jVftFbL1pXp11rbMbK1chAOznB3Y68S4zzJArQ4Dv44DcMIS2leHOGWwtLRq-l1UerV1lq2h7KLptONuaKdYXQDR26ptfDw0FOvNIvWJNCkXEA2U58mA0vI2HXVdEj4grCwoLlVs0ky3Vc5-6fmtXsP8XjhmEAoX_RAmam-8wNsH_ZPP076JfxT-bhtInjiEiEVFt_yGb9lUNKpS1o4": "/assets/f965df88587a22cb.jpg",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuDn-t-3yx_Km8_g7Bb8Vz6R0nZ-_khiHI9IajD8SpjsqQIg2cIdVHhCr68rOwsDsTXH-OZib46hQmNXMqcKgKOTTU7wDLzgUyB26zuf8-lHVpQqiq_xB7EB5ZcD_CVp6Wx6qx6eUFpt_xEspzwOKd-3M-QTURBbyYkzWbyjmQ1226KtZ02EFtYnOFuzxoWFjF7OTa4ayvLlZC52WWvG7ZqK1fgX51BgmnCizd0N5obc": "/assets/07935d19d8fa71b2.jpg",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuCAnutjwpkXc12MZN0XnQiAH5Kc2csOEi3m7RQ0G5kYUf-emZAm1xA43Yb7qAdC8ZL9AUiJOz4AazGmA23LGK4g15H2K2xocy-5kkG49Ex54dW8XdV7sVwBKrHCZbSixFL99T9e5SIaUA2itYeX-cP9Ykvg-2yHEnb22YxmWPn1P4KJ56OYQPIJOZu32KkdppW3oyk1XkxuQo1rSN71-Ng7xtvqpV1pb92xnaocbp7P": "/assets/7f5717f7ed877c20.jpg",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuDo0_0aJ11pTC2ZWYwXDtUBNl1hJ0xWGIC8-5cdYYauM1g-dy8N93TYfLCxn_R-4E1j4vxHM2q-BVydfIE9VtwWYMajLMLUr2khPaqqG3Viq5QywYbbJqqBB-p4MlEpbxTN2hiIbsvs47LqkimIPF5DWQ0cY33AMLR6cF19jEiiZVrgix3eAqLMSMPw00pVYjJX9Hw54GIBA4x-X7ilKivR47EjC_4U19BwwQiLPYU7": "/assets/36cb6e7a27732b36.jpg",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuC6ZWI4PfJcSIyn3-UvnXaA2h2l2YMZaxitag3srtiPCI_lj33-xp-UIktZWsLjwDoOSe9Qg-lBW-wEJlnMIVfyOjXRCmoHhCrU_b4UsXzWu2kZCnBkGwduSb105d7mQST4KVFyHu0KcMLSASXMd0Zex2Jtr6XdEpwsGL7ZJmBLXPsDJLk9D73xJmyQPadgZTshEYQYZKCxEtGL6N2os-zFG8uMcHdPqHkO58mjm22A": "/assets/3fa408cd126b63d0.jpg",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuADipaLenLWcG5UfvX3llENyVg1uCXhzzUuYbsQFzHNSfSyyrxuFU0wHycTN4kAfTlxzE47Uar0-YbRxM3hzy1aMip2IUwRgpLp40UzgxmxMTx2Mrx7M6MS93n574KUu0t_B7IHbtCmr7qOdU-ILLOZPUSZisXFEaqdwCwK3KRuY72Xyk0OaLZnIi9sNMbhkYlGOeIXypr4AAW50az8wHlwIaemkkMsAVmqoYYUbvic": "/assets/6029111de536f17b.jpg",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuAv6zc01Eex0iLHj9k4kdo9s44OwsIQA6wIffFVxaTuk_uMfdRTVEMXlhVJ5cblBJshpy1UzTeHA8_KOjwClX3_zdScg8n6rdDWHdwRYk4EHU2ENGhVyB-vqUcdf82QbWu9czaDEIp1HDYx-wUKLhv6KpMgZH4Pgh5zS68VRY3YErUoVGftOonclymGXvib4b2Q7gbE7ieIst1CAIoXISlQy2S1EGPErQ8rWHIQGll1": "/assets/c834e8e54704ac37.jpg",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuA3ljByuaOEywxGKALYjUCR7ggkItg-Lm5zTJNRk5VK99VVcDN034uyKzPPHGEcxHaeJkrq452joKrYxUrv4EEYuU5kGi3N-y_Eo_obC25dtESv6BI1AXjCTXz3FZuYZsYPWkeSyO8DVTbSzBfgJJwdvhPI8bJ8dr2BYyfuRVNzODBDTmkI-XzI0CHxI1g6dyUlL1rf-pWX6s4uyacAf8JIyiXYM9od4I0IW4zW2cbC": "/assets/86e5a2dfed7b3799.jpg",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuDN7FUtUucPR4Z-CYZ9QEzVZWlk5E5IswGTQl8KadGpJfdMgv6W_IRBiB14MoPdvSjtpx51YtXu8iJi23ucTI8Wxpr2RY0WmCwZYJaimOgUFb-THXw1C0c1ErQHdiUa56WdtHn1LH2iBhee6fKOfF7evW_NmuUhJfCCJIh9W0VFpzbSGDHkx_lrNJbZhxjqgAE68UurmD3dlyZCi-04vLlcBKBAlKWbOOtgn5Nssmvw": "/assets/e96c95699a8af7ee.jpg",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuB3NE1ksbqC1dGYeCLBWs4SdF55GhRPCoUwDOOH1oyoEvivWtLPU3Nvp6xIRMY1k1T521uhNiNYQNj5knoyHu4am6B5qq3oBQeWv6dAdBxFcQSQ7b-8LKhwExSUr3YToNDjusCwdWX025YfxGic2y-ZTfch8ZLyEl5sv6u4hD_4lHzktQgPgd295jwNYBg9cBSh_Q4X8XZjWv1epxOo6NM18JEQ8XDQMO7whmc5PhaC": "/assets/058a1c5ad11c93fe.jpg",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuArj7P0x4k6m0u2lA8Jk8CDu1L0uLRteGl2eHOJ5SZyTDysBJoxxT26ONFHpMUHixD5InONKkxCc2nb9_8aA2C05dpJF4JIhszZzqhZ7tZLyn2WaCuapHh7sMnehWirHmbUhAo022zRLNdNSsA2c4MFo-lAFhqYl7cfTg8_AlxcitwZLTGrUCkWx09vvD32nBN1vcK18O5G5tTBJ-y_h_s2-xcjvOzAi85ic2UZLEPF": "/assets/131b2ef85ff02393.jpg",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuBMeCvn-sx0UQTmUoUqEiILQjX-28zbSmftrDuVxoAex6wqpQjXnphJ5sUXsWgkeK0UloOBnB2-wZ_oeYepWR3xSNuc5nat-vRzh1r7kt0xkFVNp9hwwM2lXG9aKfllBjXW8RMeGkjC8xqz9iLUOa2Z2h3P-jSCU5qrKLifEAK_Uv8QFUH5e7ciAeUx0lagNg0qn5HrjBDocYEjqcAfYi6kesAp21wqZOopTCRWHCUt": "/assets/06c1185292daa6f1.jpg",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuCei6jQmrw7Rb9935KfxLHxIiLhSsQtxcBJjTKEDj_7obLZvA1TlKVGySMKlbsxRWKl2_jWj9bhJLRUYgU91rCWNxrJbpGXKUta0jRjI-rLbY8ZbkGjDlc4cdZUbDRDm5cepjAFCnvUQeytHgmDK_sSCQeuK0AQJerPmKXC2GyvY0nJYf81s3dtZxI9rpK1fA1EQBkxh2c6L9pXd0mF4OS1ibgVnXzzGUGsFVty2YQD": "/assets/9bd6faf6c20173bd.jpg",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuCqc2cql31u7uQpxOkgBLC09dLqJXuO_S9G36hYkWH-njb5UHNHBcfZpmgQiNIDGwiE_cjXjQ6Fr2mzzJgC3N2FP5TbwIyGPQNhxQfn9Qe6vBhUfxTAso0vM0A_jA3lf74pX1qyGMScAzl_y_xF7zcIkrbvV5pCgT-orM-WcmE11UtsJJ65fWJ8KDJPbsvEUjsXXxUzRo6II6Q7VmuGzDkwElT1skwHCk2MNCY90p1U": "/assets/e81c230a82e374e6.jpg",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuBD_a0nWh8eYGAYIIk4tdwfVcEmc5AAf19Ni6dZcjK7ZyOcBedN7dVKXSZ6DPlUdemPQuFbtdR0c2vk59zbfA7myOGHCa8J64HGdrjEu2OyKSCE2BOCmEWNvFcWWNEAOXQmgUwkseKVBh64Nww1ielQtPwYaRN-X2ZZdwpRXFd7WO5_R_S68EN0XQ0DjibtB5yOsVe62FsM9lOWrp2CjerQnW7yMglg83LTm59av_rV": "/assets/2ef6cf63959f9032.jpg",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuBxsmPJ7HdNe_bNbuXrY2zwkY7FWVTW6_3Ty8aY91UGvFM5DA3yegxsA2iX1zRJWVNKiGLDofqXf3kNDu8rgRqMjxryigKL2EW7JiyXPXHOGAkOUWhAEnotWwxBU-oeK0-xsRvqxh5sr-0rr8rgksJqHFEgSxtF0j8B1M5e33-624jcXw73TfwAbj3-VbQn4G3lxF6Y9sjoJy-AT91vggEzJtrwSLomuk0Lx3svMs_E": "/assets/e091165a8ed5c6eb.jpg",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuAnzWMgnHPh6arC5UjtTjpVCMyRkfgFE7TdWc54Y2mF8phP8lr6ifo5JzElkwF6rQaozi1acqHERLSKIBa3xd0oNNFpY0jQodA2xbUbPZTTaM1AZZuxkjb1PQyk2IVTSReltvhTYXn2CgyLRtUyeKFllqHkWg7M69ozyqh4hyoWmIj6GQEAPTeqY8r981q1x3EWhf3wZ26hZoSGY9NyawAMKg9qWi92o91KbqYRA44Z": "/assets/8d830be46874f995.jpg",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuA-Xc2z7tdIGrp6cC8_vH_RxWK9hLI47623bnCXpIXKUc7TyvgvjuUpA0XiL26PCwgfiy6Ck4ErKbWSZ3l9bmNL5dasDrzvsQyr9fIiVXhbL-oj0wVISD89A55OtNqmXE4thZ1UiGXrXuR5ayM3-Vp5Q--ZapdxyDZsROFljA5J4W5XhG-VOnSwJ0j54nFw1opiwpxZNmH6jynUJYotum1Hlb6L6tSkb19QgHAkB2T8": "/assets/e5096781db724883.jpg",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuAz2G264X4sKKcsJV-2yc9G0WXNy2p9RUGGA-in-W3QODl3_oUGHHYXt12lMAb399bWyECSziaNEuef_C96r0NylE8ClUfkgc3zbVF5su4bTFPj7xX3bQxmWWy32DdqgsFLIER6NtrPKev6jgvnqBYT-ysZ0yQjZR02MAoi5z6wSTzBtLEoty2dAMbvBWfx-7H0MrfB-VO64z279GnjgONlRJStcnU-xJETof9dPlNc": "/assets/da3158614fa922ea.jpg",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuCPlcBHI7NkA8Y01O9fdfjnlfkhHFcDTvpx0TdWuvgydkg5-mfFN8F98vWaU6pt8ShbbLJ7I1KNWsdHQgcyWeWdZAFVyMXollJdi_AHOeGJSbHAbdoJHpgWoMzQeqdTwNxwxYAgg-NzTBnrEX8eRI-qp1_vChZZ9pVWrTFNcip8kL16epdPuZFt0PbtnmY_q600OMl1jcazpJ3G8XlK0URgge3lUKg7ttcFSqDLmvWL": "/assets/96ac8c3e632a9f26.jpg",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuAbMr5APzmBXzYscp_PX0Ws5lbGV5TRoJ6VoBYVK-wmxpEE4xwHEpJIVcGdvQqaojxuAHgPXSRuMDgFfINLpd69C7vw1nFZ_Z--XaCy8pStuVr9hjGm12hI2b8Od3la0w7VJPIiUZ7M17TKp85uIDR6GxmamUR5mxg1KtKPoxcucQkowsCAPoFT8u4m397Y0vJet5q2AC1D4npdbYoMxnDedjm9diOUYZMJTNS6WZpg": "/assets/ada7aa3deef23089.jpg",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuCx8upXqXtpftb6waKzVAQLz9-q8fLlHMoEERyqOOzN4vKjYZAErzZz4chvMSaAZAMZrQt5OadgHCz6d91w_SvPceEF-I5jYF4LXwfbkRdoifz7bvv8CoVWth2RjpfR59I8HoqjrANRoSTuzZDfDcaAdtl0xbja_isHYpXXUYpIoBKfn8ZbwL2G_eiM7Z2_8xyOSzUBuUQTPHRMHpBWah71_TEGPj4IVADxq9LeA1Tc": "/assets/5016cca4c2fd8bb7.jpg",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuAIjNAEzv4RGVMoycfG4Vkb-42gaSVX8_DoHHzO1ePtjF63ID-A6oD5xKjaPqbuaiFNlcplnvl4FsD8y6lasVa83lSPu8ECGklwa6ehX_3rx0K4NDmGj3Fb1midVKkDaKsTzwdpCS6UUkvUkaCMwR_rtHi34mrPOEIez9CCn_kjNf0YpUSzdRR7nULo7w6J7ob0mukJw0VG-CcrUBE9fN536FmR7C4LqYIKJ-Hmf0hw": "/assets/ecb74e54bb7af5cf.jpg",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuCur19Vi2Q_G6fWRCU3caljX1hwp0GrOR9U-m6zqS4d1aoYDezPU5NpJuBEF-uR_-fXbPI3C2MWmQz2DEOWERgSDiN5wADC0ntahTPwsMbFdhBo0X5yYSz5Oy_p4eo1Qs-2xocGo2qxmMEh1TOgArO33Mn-2CT-NUdw_OT2O2poz8NreQVHBbe6NL-UUKC3WqZC9kwaBUBrX16REGbAJSbPmpQcU-NReVW1PIO6p7YB": "/assets/8633b361f3fa4140.jpg",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuCpwuI99RVlnz8MkiKq1_Bbt-GEfPFj3smV2hmlvt8cURspIkBPHxFouta5EBNbf4mPggl603aaxad-g0LllKacfMkPWUunU-mLclNVTfKnv8izHzb5s_VluPmJk1eeXwMvhW50iBEAHuN2C45gHkq3bWxOcgeHwspIEEp2bq1NSbl6isT2q3Px58PNDZ3qAkmE1oX-a98-oEc1gynRIqGivPHNNtFetzhNrZZTA7D7": "/assets/93c92211643839cd.jpg",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuC2jvz0y47NpZxllLJK2hXWypoEbHGc9hB9EdsLChIsC-jj1p7ZwiZmy4rk-poEWaBzNfIxvKnmFmcEggI5rYHaQ14byaVRQlM1I5_H5qgboKQfOFoD9HfsnrSau6RLb2PbRP1sCIrCSJlrH6VlgZjnchSzJAvS5AJu37cMuHx48UIqdX5m57EndTHq0FoYMUx2Rn_2ZZS5JiFRqG9UBtJsIrVw6Of8i2-mbxiPu9rD": "/assets/dd6374981b62f1be.jpg",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuDL5kq5g0WG9NIC3w2qtykJONn3Imi46Zc2wGPoN62wai5AxgaDiK6V3p1f7qEtlwOMGYpii3s9Rf4cXYqXgZYw1ISijyayrBNRf0b1JuQLjvw10IbDMPJq4GFusDYuC0hNrNuTZnNW45Npo2f9xL2E_WmG1ffnl0Kbi8MiZQ26Kn3qneyi50YKpllIrT1xLsbv51SZdLgWSSonQ9uHCa_UqFpE7JOOi8Csf1aqJLbX": "/assets/221113f7a4f85c7b.jpg",
+    "https://lh3.googleusercontent.com/aida/ALJJyrBUTVuAQa0o2b6ioi-b6DZh3tZ-acV47PKaxbe5QZaTRNho89ten_PcAAPca7L28rS8YXFBEqjDpPdtLuPXpX8ciYbmUXpuN8G8onomb0cY4RJhp-h-U0YhH2mejh61l_cJ0dAXV1ZohnYBzqs6iPBTpHMnzUe7--CxauLTpeq9jEpcvw3DOPt8-sV5cA2mU2Pwf2xbfrBllt-ohYkUqZ4M480gRvMatwkN6kcblhqAHg": "/assets/a7813be4f0f63fdd.jpg"
+  }
+}

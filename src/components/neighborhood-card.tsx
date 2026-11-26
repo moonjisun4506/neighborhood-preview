@@ -1,0 +1,11 @@
+'use client';
+import {useRouter} from 'next/navigation';
+import {useApp} from './app-provider';
+import {MemoEditor,SaveButton,Button} from './ui';
+import {SummaryContent} from './ai-summary-panel';
+import {Icon} from './shell';
+export function AddressCard({id}:{id:string}){
+  const {data,cloudIds,saveAddress,storageBusy,storageStatus,selectAddress,toggleCompare}=useApp();const router=useRouter();const address=data.addresses.find(a=>a.id===id);if(!address)return null;
+  const open=(route:string)=>{selectAddress(id);router.push(route);};
+  return <article className="dossier-card" data-testid={'card-'+id}><div className="dossier-visual"><div className="address-card-map"><Icon name="location_on"/><strong>{address.label}</strong><small>{address.source==='kakao'?'카카오에서 검색한 주소':address.source==='demo'?'UI 예시 주소 · 위치 검증 안 됨':'좌표 미확인'}</small><label className="compare-check"><input type="checkbox" checked={data.compare.includes(id)} disabled={!data.compare.includes(id)&&data.compare.length>=3} onChange={()=>toggleCompare(id)}/> 비교함 담기</label></div><div className="metric-pair"><div><small>주변 대중교통</small><strong>지도에서 조회</strong></div><div><small>지역 월세 통계</small><strong>조건별 조회</strong></div></div></div><div className="dossier-detail"><div className="card-heading"><div><span className="eyebrow">사용자가 저장한 주소</span><h2><button type="button" onClick={()=>open('/explore')}>{address.label}</button></h2><p>{address.address}</p></div><SaveButton id={id}/>{!cloudIds.includes(id)&&<Button disabled={storageBusy||storageStatus!=='ready'} onClick={()=>{void saveAddress(id);}}>DB로 이전</Button>}</div><MemoEditor id={id}/>{data.aiSummaries[id]&&<details className="saved-ai-summary"><summary>저장한 AI 생활환경 요약 · 개인 메모와 별개</summary><SummaryContent summary={data.aiSummaries[id]}/></details>}<div className="demo-summary"><strong>주변 정보 조회 상태</strong><p>생활시설은 주소 미리보기에서 조회할 수 있습니다. 대중교통·경로는 지도에서 ODsay 인증 후 확인할 수 있습니다. 월세 통계는 주소 미리보기에서 조건별 조회할 수 있습니다. AI 요약은 조회 근거와 개인 메모를 구분해 표시합니다.</p>{address.source==='legacy'&&<p>기존 동네 보관 기록을 이전했습니다. 원래 메모는 보존했으며 상세 주소와 좌표는 확인되지 않았습니다.</p>}</div><div className="card-actions"><Button onClick={()=>open('/explore')}>지도에서 주소 확인</Button><Button onClick={()=>open('/summary')}>AI 주변 환경 요약</Button></div></div></article>;
+}

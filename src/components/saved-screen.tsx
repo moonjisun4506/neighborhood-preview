@@ -1,0 +1,13 @@
+'use client';
+import {useState} from 'react';
+import {useRouter} from 'next/navigation';
+import Link from 'next/link';
+import {useApp} from './app-provider';
+import {AddressCard} from './neighborhood-card';
+import {Button} from './ui';
+export function SavedScreen(){
+  const {data,update,storageStatus,storageError,retryStorage,cloudIds}=useApp();const router=useRouter();const [filter,setFilter]=useState('all');const [sort,setSort]=useState('saved');
+  let selected=data.saved.filter(id=>filter==='all'||(filter==='notes'?Boolean(data.notes[id]?.trim()):!data.notes[id]?.trim()));
+  if(sort==='name')selected=[...selected].sort((a,b)=>(data.addresses.find(x=>x.id===a)?.address??'').localeCompare(data.addresses.find(x=>x.id===b)?.address??'','ko'));
+  return <div className="page-container saved-page"><div className="page-kicker"><span>주소 보관함 / 직접 작성한 임장 메모</span><span>익명 DB 보관함 · 쿠키 유지 시 복원</span></div><div className="page-heading"><div><span className="eyebrow">Saved Addresses · {data.saved.length}곳 보관 중</span><h1>저장한 주소 &amp; 나의 메모</h1><p>관심 주소를 기록하고, 직접 선택한 2~3곳을 같은 항목으로 비교하세요.</p></div><Button className="selected" disabled={data.compare.length<2} onClick={()=>router.push('/compare')}>선택한 주소 비교하기 ({data.compare.length})</Button></div><p className="field-help">DB 보관함 {storageStatus==='ready'?'연결됨':storageStatus==='loading'?'불러오는 중':'연결 실패'} · DB 저장 {cloudIds.length}곳. {storageError} 쿠키 삭제·30일 세션 만료 후에는 복구할 수 없습니다. 이전 브라우저 기록은 개별 이전할 수 있습니다.</p><Button onClick={()=>{void retryStorage();}}>DB 보관함 새로고침</Button><div className="list-toolbar"><div className="filter-tabs">{[['all','전체 목록'],['notes','메모 작성 완료'],['pending','메모 작성 전']].map(([v,label])=><Button key={v} className={filter===v?'selected':''} onClick={()=>setFilter(v)}>{label}</Button>)}</div><label>정렬 <select aria-label="저장한 주소 정렬" value={sort} onChange={e=>setSort(e.target.value)}><option value="saved">저장 순</option><option value="name">주소 이름순</option></select></label></div><div className="dossier-list">{selected.map(id=><AddressCard key={id} id={id}/>)}{!selected.length&&<div className="empty-state"><h2>표시할 저장 주소가 없습니다</h2><p>직접 주소를 검색해 저장하거나 다른 메모 필터를 선택해 주세요.</p><Link href="/">주소 검색하기 →</Link></div>}</div><section className="moving-tips"><h2>내가 직접 확인한 내용을 기록하세요</h2><div><p>채광과 환기<br/><small>방문한 시간과 관찰 내용을 남겨 보세요.</small></p><p>생활 동선<br/><small>직접 걸어본 경로를 메모해 보세요.</small></p><p>임대 조건<br/><small>확인한 보증금·관리비와 출처를 적어 보세요.</small></p></div></section><aside className="comparison-tray"><div><strong>비교함 {data.compare.length}곳 선택됨</strong><small>최대 3곳 · 직접 선택한 주소만 비교합니다.</small></div><Button onClick={()=>update({compare:[]})}>선택 해제</Button><Button className="selected" disabled={data.compare.length<2} onClick={()=>router.push('/compare')}>선택한 주소 비교하기 →</Button></aside></div>;
+}

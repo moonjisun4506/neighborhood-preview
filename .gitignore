@@ -1,0 +1,15 @@
+node_modules/
+.next/
+.env*
+!.env.example
+test-results/
+playwright-report/
+*.tsbuildinfo
+research/noise/
+.npm-cache/
+# Expanded design sources are tracked; omit their duplicate archive.
+stitch_ui_ux.zip
+# Local credentials and diagnostic output.
+*.pem
+*.key
+*.log

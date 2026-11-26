@@ -1,0 +1,9 @@
+'use client';
+import Link from 'next/link';
+import {usePathname} from 'next/navigation';
+import {demoNotice} from '@/lib/demo-data';
+export function Icon({name}:{name:string}){return <span aria-hidden="true" className="material-symbols-outlined">{name}</span>;}
+const links=[['/explore','주소 미리보기','map'],['/saved','저장한 집','bookmark'],['/compare','주소 비교','balance']];
+export function Header(){const path=usePathname();return <><header className="app-header"><div className="header-inner"><Link href="/" className="brand"><span className="brand-icon"><Icon name="explore"/></span>동네 미리보기</Link><span className="brand-tag">관심 주소의 생활환경 미리보기</span><nav aria-label="주 메뉴" className="desktop-nav">{links.map(([href,label])=><Link key={href} href={href} aria-current={(path===href||(href==='/explore'&&['/','/transport','/summary'].includes(path)))?'page':undefined}>{label}</Link>)}</nav><nav className="header-shortcuts" aria-label="보관함 바로가기"><Link href="/saved">저장한 집</Link><Link href="/compare">주소 비교</Link></nav></div></header><nav aria-label="모바일 메뉴" className="mobile-nav">{links.map(([href,label,icon])=><Link key={href} href={href} aria-current={(path===href||(href==='/explore'&&['/','/transport','/summary'].includes(path)))?'page':undefined}><Icon name={icon}/><span>{href==='/summary'?'AI 요약':label}</span></Link>)}</nav></>;}
+export function DemoBanner(){return <details className="demo-banner"><summary>데이터 출처·조회 한계</summary><span>{demoNotice}</span></details>;}
+export function Footer(){return <footer className="app-footer"><div><strong>◈ 동네 미리보기</strong><p>내가 선택한 집 주소 주변의 생활환경을 미리 확인하세요.</p><p>카카오 검색 결과와 직접 작성한 메모를 구분해 표시합니다.</p></div><div><strong>데이터 안내</strong><p>시설은 카카오, 대중교통은 ODsay 조회 결과만 표시합니다. 월세는 국토교통부 지역 실거래 참고 통계입니다.</p><p>저장 주소·개인 메모는 익명 DB 보관함에, 비교 조건·목적지는 이 브라우저에 보관됩니다.</p></div></footer>;}
