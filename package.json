@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit",
     "test": "playwright test",
     "db:migrate": "node scripts/migrate-saved.cjs",
+    "db:migrate:tmap": "node scripts/migrate-tmap.cjs",
     "db:cleanup": "node scripts/cleanup-saved.cjs"
   },
   "dependencies": {

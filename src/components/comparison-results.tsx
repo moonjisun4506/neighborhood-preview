@@ -8,6 +8,7 @@ import {ComparisonAi} from './ai-summary-panel';
 export function useComparison(items:AddressRecord[]){
   const {data,update}=useApp();const [type,setType]=useState('sh'),[month,setMonth]=useState(()=>rentMonths()[0]),[min,setMin]=useState('0'),[max,setMax]=useState('');
   const [results,setResults]=useState<Record<string,ComparisonData>>({}),[loading,setLoading]=useState(false),[queried,setQueried]=useState(''),[revision,setRevision]=useState(0);const abort=useRef<AbortController|null>(null);
+  useEffect(()=>{const times=Object.values(results).flatMap(r=>r.routes?.expiresAt?[Date.parse(r.routes.expiresAt)]:[]);if(!times.length)return;const timer=setTimeout(()=>setResults(old=>Object.fromEntries(Object.entries(old).map(([id,r])=>[id,r.routes?.expiresAt&&Date.parse(r.routes.expiresAt)<=Date.now()?{...r,routes:undefined,routeError:'경로 자료 유효기간 만료 · 교통 탭에서 다시 조회해 주세요.'}:r]))),Math.max(0,Math.min(...times)-Date.now()));return()=>clearTimeout(timer);},[results]);
   const signature=JSON.stringify({items:items.map(a=>[a.id,a.coordinates]),radius:data.radius,destination:data.destinationLocation,days:data.commuteDays,roundTrip:data.commuteRoundTrip,type,month,min,max});
   useEffect(()=>{abort.current?.abort();setLoading(false);setResults({});setQueried('');return()=>abort.current?.abort();},[signature]);
   async function run(event:React.FormEvent){event.preventDefault();abort.current?.abort();const controller=new AbortController();abort.current=controller;setResults({});setQueried(signature);setRevision(v=>v+1);setLoading(true);

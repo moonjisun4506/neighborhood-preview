@@ -14,6 +14,7 @@ test('nearest two per category share the same map markers and empty noise has a 
   await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);await page.screenshot({path:'test-results/concise-noise-mobile.png',fullPage:true});
 });
 test('transit cache reuses both directions across buttons, tabs, reload and AI without new calls',async({page})=>{
+  test.skip(process.env.NEXT_PUBLIC_TRANSIT_ROUTE_PROVIDER!=='odsay','기존 ODsay 전용 UI fixture입니다. ODsay 모드에서 실행하며 TMAP 모드는 tmap.spec.ts가 검증합니다.');
   await seed(page);let stations=0,routes=0;
   await page.route('**/api.odsay.com/**',async r=>{const u=new URL(r.request().url());if(u.pathname.includes('pointSearch')){stations++;return r.fulfill({json:{result:{station:[]}}});}routes++;await new Promise(resolve=>setTimeout(resolve,80));const outbound=u.searchParams.get('SX')===String(home.coordinates.lng);return r.fulfill({json:{result:{searchType:0,path:[{info:{totalTime:25,payment:outbound?1500:1700},subPath:[{trafficType:3,sectionTime:3},{trafficType:2,startName:'집앞정류장',endName:'직장정류장',lane:[{busNo:'7011'}],sectionTime:22}]}]}}});});
   await page.route('**/api/ai/summary',r=>r.fulfill({status:503,json:{error:'전송 자료 검증용 응답'}}));
@@ -25,6 +26,7 @@ test('transit cache reuses both directions across buttons, tabs, reload and AI w
   await page.getByRole('tab',{name:'교통·소음·치안',exact:true}).click();await page.clock.setFixedTime(new Date(Date.now()+24*60*60*1000+2000));await page.getByRole('button',{name:'대중교통 경로 조회',exact:true}).click();await expect(page.getByRole('button',{name:'대중교통 경로 조회',exact:true})).toBeEnabled();expect(routes).toBe(4);
 });
 test('quota blocks further calls and retries across tab navigation and reload',async({page})=>{
+  test.skip(process.env.NEXT_PUBLIC_TRANSIT_ROUTE_PROVIDER!=='odsay','기존 ODsay 전용 UI fixture입니다. ODsay 모드에서 실행하며 TMAP 모드는 tmap.spec.ts가 검증합니다.');
   await seed(page);let calls=0;await page.route('**/api.odsay.com/**',r=>{calls++;return r.fulfill({json:{error:[{code:'429',message:'Daily quota exceeded'}]}});});await page.goto('/transport');await page.locator('.transit-disclosure>summary').click();await expect(page.locator('.transit-error').first()).toContainText('한도');expect(calls).toBe(1);
   await page.getByRole('button',{name:'대중교통 경로 조회',exact:true}).click();await expect(page.locator('.journey-panel [role=alert]')).toContainText('자동 재시도 없이');await page.getByRole('button',{name:'정류장 다시 조회'}).click();await page.getByRole('tab',{name:'주변 시설',exact:true}).click();await page.getByRole('tab',{name:'교통·소음·치안',exact:true}).click();await expect(page).toHaveURL('/transport');await page.reload();await expect(page).toHaveURL('/transport');await page.getByRole('button',{name:'대중교통 경로 조회',exact:true}).click();await expect(page.locator('.journey-panel [role=alert]')).toContainText('24시간');expect(calls).toBe(1);
 });

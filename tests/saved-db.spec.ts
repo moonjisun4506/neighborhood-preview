@@ -34,6 +34,7 @@ test('LIVE Neon UI: save, edit/delete memo, restore without localStorage, open m
   }finally{await page.request.delete('/api/saved',{headers:{Origin:origin},data:{id:address.id}});}
 });
 test('comparison uses identical facility, destination, days and rent criteria and hides stale data',async({page})=>{
+  test.skip(process.env.NEXT_PUBLIC_TRANSIT_ROUTE_PROVIDER!=='odsay','기존 ODsay 전용 UI fixture입니다. ODsay 모드에서 실행하며 TMAP 모드는 tmap.spec.ts가 검증합니다.');
   const addresses:AddressRecord[]=[0,1,2].map(i=>({id:'comparison-'+i,label:'비교 검증 '+i,address:'테스트 주소 '+i,source:'kakao',coordinates:{lat:37.55+i/100,lng:126.91}}));
   await page.addInitScript(addresses=>localStorage.setItem('neighborhood-preview-v2',JSON.stringify({addresses,selectedId:addresses[0].id,saved:addresses.map(a=>a.id),compare:addresses.map(a=>a.id),notes:{[addresses[0].id]:'사용자가 적은 개인 메모'},radius:500,destinationLocation:addresses[2],commuteDays:20,commuteRoundTrip:true})),addresses);
   const facilityCalls:URL[]=[],rentCalls:URL[]=[],transitCalls:URL[]=[];

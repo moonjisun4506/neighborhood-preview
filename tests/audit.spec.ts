@@ -14,6 +14,7 @@ test('LIVE building search, school/work registration and visible MOLIT values ma
   await page.screenshot({path:'test-results/audit-live-rent-desktop.png',fullPage:true});await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);await page.screenshot({path:'test-results/audit-live-rent-mobile.png',fullPage:true});
 });
 test('address and radius changes clear old facility, station, route, rent and monthly values',async({page})=>{
+  test.skip(process.env.NEXT_PUBLIC_TRANSIT_ROUTE_PROVIDER!=='odsay','기존 ODsay 전용 UI fixture입니다. ODsay 모드에서 실행하며 TMAP 모드는 tmap.spec.ts가 검증합니다.');
   await seed(page,[a,b],['convenience']);
   await page.route('**/api/locations/search?**',r=>r.fulfill({json:{results:[b],hasMore:false}}));
   await page.route('**/api/facilities?**',r=>{const q=new URL(r.request().url()).searchParams,isA=q.get('lat')===String(a.coordinates!.lat),origin=isA?a.coordinates!:b.coordinates!;return r.fulfill({json:{source:'kakao',origin,radius:Number(q.get('radius')),category:'convenience',limited:false,places:[{id:isA?'facility-a':'facility-b',name:isA?'A 시설 고유명':'B 시설 고유명',address:isA?a.address:b.address,jibunAddress:'',category:'convenience',categoryName:'편의점',distanceMeters:15,coordinates:{lat:origin.lat+.0001,lng:origin.lng}}]}});});

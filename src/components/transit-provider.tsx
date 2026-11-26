@@ -5,6 +5,7 @@ import {useApp} from './app-provider';
 import type {TransitStation,TransitNearby,TransitRoutes} from '@/lib/transit';
 import {fetchTransitNearby,fetchTransitRoutes,cachedTransitRoutes} from '@/lib/transit-client';
 import {OdsayError} from '@/lib/odsay-data';
+import {TmapError} from '@/lib/tmap';
 type NearbyState={key:string;status:'loading'|'success'|'error';data?:TransitNearby;error?:string;code?:string};
 type RouteState={key:string;status:'loading'|'success'|'error';data?:TransitRoutes;error?:string;code?:string};
 const Context=createContext<{nearby:NearbyState|null;stations:TransitStation[];showBus:boolean;showSubway:boolean;setShowBus:(v:boolean)=>void;setShowSubway:(v:boolean)=>void;retryNearby:()=>void;focusStationId:string|null;focusStation:(id:string|null)=>void;routes:RouteState|null;queryRoutes:()=>void;canRoute:boolean}>(null!);
@@ -23,10 +24,11 @@ export function TransitProvider({children}:{children:ReactNode}){
     return()=>controller.abort();
   },[ready,originKey,origin?.lat,origin?.lng,data.radius,active,attempt]);
   useEffect(()=>{routeController.current?.abort();if(!origin||!destination){setRouteState(null);return;}const hit=cachedTransitRoutes(origin,destination);setRouteState(hit?{key:routeKey,status:'success',data:hit}:null);},[routeKey]);useEffect(()=>()=>routeController.current?.abort(),[]);
+  useEffect(()=>{const expires=routeState?.data?.expiresAt;if(!expires)return;const timer=setTimeout(()=>setRouteState(null),Math.max(0,Date.parse(expires)-Date.now()));return()=>clearTimeout(timer);},[routeState]);
   const queryRoutes=()=>{
     if(!origin||!destination)return;routeController.current?.abort();const controller=new AbortController();routeController.current=controller;setRouteState({key:routeKey,status:'loading'});
     fetchTransitRoutes(origin,destination,controller.signal).then(result=>{if(!controller.signal.aborted)setRouteState({key:routeKey,status:'success',data:result});})
-      .catch(error=>{if(!controller.signal.aborted)setRouteState({key:routeKey,status:'error',error:error instanceof Error?error.message:'경로를 조회하지 못했습니다.',code:error instanceof OdsayError?error.code:undefined});});
+      .catch(error=>{if(!controller.signal.aborted)setRouteState({key:routeKey,status:'error',error:error instanceof Error?error.message:'경로를 조회하지 못했습니다.',code:error instanceof OdsayError||error instanceof TmapError?error.code:undefined});});
   };
   const nearby=originKey&&nearbyState?.key===originKey?nearbyState:null;
   const stations=useMemo(()=>nearby?.data?.stations.filter(s=>s.kind==='bus'?showBus:showSubway)??[],[nearby,showBus,showSubway]);

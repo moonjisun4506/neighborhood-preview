@@ -87,3 +87,6 @@ test('all ten facility toggles independently hide and restore mocked marker resu
   for(const [id,label] of facilityCategories){await page.getByRole('checkbox',{name:label,exact:true}).check();await expect(page.locator(`.facility-map-marker[data-category="${id}"]`)).toHaveCount(1);}
   await expect(page.locator('.facility-map-marker')).toHaveCount(10);
 });
+
+// Existing facility tests isolate pedestrian calls; actual TMAP is tested only with RUN_TMAP_LIVE=1.
+test.beforeEach(async({page})=>{await page.route('**/api/tmap/walk',r=>r.fulfill({status:503,json:{code:'TEST_ISOLATED',error:'도보 API 실검증은 별도 TMAP 검사에서 실행합니다.'}}));});

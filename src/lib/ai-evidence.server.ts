@@ -9,6 +9,7 @@ import {safetyData} from './safety.server';
 import {safetyEvidenceText,safetyEvidenceSource} from './safety';
 import {nearbyNoise} from './noise.server';
 import {addressEvidence} from './address-evidence.server';
+import {peekTmapRoutes} from './tmap.server';
 export function validateSummaryRequest(value:unknown):value is SummaryRequest{
   if(!value||typeof value!=='object')return false;const v=value as SummaryRequest;
   return Array.isArray(v.addresses)&&v.addresses.length>=1&&v.addresses.length<=3&&new Set(v.addresses.map(a=>a?.id)).size===v.addresses.length&&v.addresses.every(a=>validAddress(a)&&a.source==='kakao'&&validCoordinates(a.coordinates))&&[300,500,1000].includes(v.radius)&&(v.destination===null||(validAddress(v.destination)&&v.destination.source==='kakao'&&validCoordinates(v.destination.coordinates)))&&Number.isInteger(v.days)&&v.days>=0&&v.days<=31&&typeof v.roundTrip==='boolean'&&rentMonths().includes(v.month)&&Object.hasOwn(housingTypes,v.type)&&Number.isSafeInteger(v.min)&&v.min>=0&&(v.max===null||(Number.isSafeInteger(v.max)&&v.max>=v.min))&&Array.isArray(v.transit)&&v.transit.length<=3;
@@ -37,6 +38,7 @@ async function publicData(input:SummaryRequest,index:number):Promise<PublicData>
   const data={facilities,rent};if(cache.size>=40)cache.delete(cache.keys().next().value!);cache.set(key,{until:Date.now()+3*60*1000,data});return data;
 }
 export async function collectEvidence(input:SummaryRequest){
+  const tmapExpiry:string[]=[];
   const evidence:Evidence[]=[];const add=(section:SectionKey,text:string,source:string)=>{evidence.push({id:`e${evidence.length+1}`,section,text,source});};
   const all:PublicData[]=[];
   for(let i=0;i<input.addresses.length;i++){
@@ -48,10 +50,10 @@ export async function collectEvidence(input:SummaryRequest){
       const nearest=f.data.places[0];add('facilities',`${prefix}${f.label} 조회 ${f.data.places.length}곳${f.data.limited||f.data.warning?'(일부 결과)':''}.${nearest?` 가장 가까운 조회 장소는 ${nearest.name}, 직선 약 ${Math.round(nearest.distanceMeters)}m입니다.`:' 검색 반경 내 반환된 장소가 없습니다.'} 전체 시설 수·도보 거리·영업 여부를 보장하지 않습니다.`,'카카오 실제 시설 조회');
       if(nearest)add('benefits',`${prefix}조회된 ${f.label} 위치(${nearest.name}, 직선 약 ${Math.round(nearest.distanceMeters)}m)는 일상 동선을 확인할 때 참고할 수 있습니다. 실제 보행 경로와 운영시간은 별도 확인이 필요합니다.`,'카카오 실제 시설 조회·확인 안내');
     }
-    const submitted=input.transit.find(t=>t?.addressId===address.id),nearby=cleanNearby(submitted?.nearby??null,address.coordinates!,input.radius),routes=cleanRoutes(submitted?.routes??null,address.coordinates!,input.destination);
+    const submitted=input.transit.find(t=>t?.addressId===address.id),nearby=cleanNearby(submitted?.nearby??null,address.coordinates!,input.radius),routes=submitted?.routes?.provider==='tmap'&&input.destination?.coordinates?await peekTmapRoutes(address.coordinates!,input.destination.coordinates).catch(()=>null):cleanRoutes(submitted?.routes??null,address.coordinates!,input.destination);if(routes?.provider==='tmap'&&routes.expiresAt)tmapExpiry.push(routes.expiresAt);
     if(nearby)for(const kind of ['bus','subway'] as const){const station=nearby.stations.find(s=>s.kind===kind);add('transit',`${prefix}${kind==='bus'?'버스정류장':'지하철역'}: ${station?`${station.name}, 직선 약 ${Math.round(station.distanceMeters)}m`:'같은 검색 반경 내 조회 결과 없음'}.`,'ODsay Web 응답·앱 전달 자료');}else add('transit',`${prefix}주변 버스정류장·지하철역 정보 없음. 조회 실패·미조회 또는 오래된 자료이므로 추가 확인이 필요합니다.`,'교통 자료 미확인');
     const fastest=(paths:TransitRoutes['outbound']['paths'])=>[...paths].filter(p=>p.minutes!==null).sort((a,b)=>a.minutes!-b.minutes!)[0],out=fastest(routes?.outbound.paths??[]),back=fastest(routes?.inbound.paths??[]);
-    if(out){add('transit',`${prefix}등록 목적지 ${input.destination!.address}까지 제공된 가는 편 경로 중 최단 ${out.minutes}분입니다. 실제 운행·대기 시간은 달라질 수 있습니다.`,'ODsay 경로 응답·앱 전달 자료');const cost=monthlyTransportCost(out.fare,back?.fare??null,input.days,input.roundTrip);add('transit',`${prefix}월 ${input.days}일 ${input.roundTrip?'왕복':'편도'} 예상 교통비: ${cost===null?'정보 없음 · 필요한 실제 요금이 제공되지 않았습니다':cost.toLocaleString('ko-KR')+'원(제공된 요금 기준)'}.`,'ODsay 실제 요금·입력 일수 계산');}
+    if(out){add('transit',`${prefix}등록 목적지 ${input.destination!.address}까지 제공된 가는 편 경로 중 최단 ${out.minutes}분입니다. 실제 운행·대기 시간은 달라질 수 있습니다.`,`${routes?.provider==='tmap'?'TMAP':'ODsay'} 경로 응답·조회 자료`);const cost=monthlyTransportCost(out.fare,back?.fare??null,input.days,input.roundTrip);add('transit',`${prefix}월 ${input.days}일 ${input.roundTrip?'왕복':'편도'} 예상 교통비: ${cost===null?'정보 없음 · 필요한 실제 요금이 제공되지 않았습니다':cost.toLocaleString('ko-KR')+'원(제공된 요금 기준)'}.`,`${routes?.provider==='tmap'?'TMAP':'ODsay'} 실제 요금·입력 일수 계산`);}
     else add('transit',`${prefix}학교·직장 이동 시간과 교통비는 정보 없음. 등록 목적지와 실제 경로·요금 조회를 추가로 확인해 주세요.`,'경로·요금 자료 미확인');
     if(data.rent){const r=data.rent,s=r.statistics;add('rent',`${prefix}${r.region.name}의 ${r.month.slice(0,4)}년 ${r.month.slice(4)}월 ${housingTypes[r.type]} 월세 거래 ${s.count}건. 월세 중앙값 ${s.medianRent===null?'정보 없음':s.medianRent.toLocaleString('ko-KR')+'만원'}, 보증금 중앙값 ${s.medianDeposit===null?'정보 없음':s.medianDeposit.toLocaleString('ko-KR')+'만원'}. ${s.smallSample?'표본 부족(5건 미만). ':''}보증금 ${input.min}만원 이상${input.max===null?'(상한 없음)':`, ${input.max}만원 이하`} 조건의 지역 참고 통계이며 개별 집 월세가 아닙니다.`,'국토교통부 실제 월세 통계');}
     else add('rent',`${prefix}지역 월세 정보 없음. 실거래 조회 자료가 없어 월세·보증금·거래 건수를 추정하지 않습니다.`,'월세 자료 미확인');
@@ -66,5 +68,5 @@ export async function collectEvidence(input:SummaryRequest){
     for(let c=0;c<facilityCategories.length;c++){if(all.every(d=>d.facilities[c].data))add('facilities',`${facilityCategories[c][1]}의 같은 반경 내 조회 건수는 ${input.addresses.map((a,i)=>`${a.address} ${all[i].facilities[c].data!.places.length}곳`).join(', ')}입니다. 검색에 반환된 건수 차이이며 지역의 우열을 의미하지 않습니다.`,'카카오 동일 조건 비교');}}
   add('checks','시설 종류나 개수만으로 소음·범죄·치안·안전 수준을 판단할 수 없습니다. 소음·채광·관리 상태·보행 동선은 현장에서 직접 확인해 주세요.','계약 전 확인 안내 · 실제 환경 판정 아님');
   add('checks','시설 운영시간, 실제 통학 시간대의 배차·환승, 관리비·보증금·계약 조건은 운영기관·중개인·계약서에서 추가 확인해 주세요.','계약 전 확인 안내');
-  return evidence;
+  return evidence.map(e=>e.source.includes('TMAP')&&tmapExpiry.length?{...e,expiresAt:tmapExpiry.sort()[0]}:e);
 }

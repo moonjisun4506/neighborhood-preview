@@ -1,0 +1,12 @@
+'use client';
+import type {Coordinates} from './demo-data';
+import type {TransitRoutes} from './transit';
+import {TmapError,tmapFresh,type WalkingRoute} from './tmap';
+type Value=(TransitRoutes|WalkingRoute)&{expiresAt:string};
+const storage='np-tmap-cache-v1',pending=new Map<string,Promise<Value>>();let memory:Record<string,Value>|undefined;
+function entries(){if(!memory){try{memory=JSON.parse(sessionStorage.getItem(storage)??'{}');}catch{}if(!memory||typeof memory!=='object'||Array.isArray(memory))memory={};}for(const [key,value] of Object.entries(memory))if(!tmapFresh(value))delete memory[key];try{sessionStorage.setItem(storage,JSON.stringify(memory));}catch{}return memory;}
+const key=(kind:string,origin:Coordinates,destination:Coordinates)=>JSON.stringify([kind,origin.lat,origin.lng,destination.lat,destination.lng]);
+export function cachedTmapRoutes(origin:Coordinates,destination:Coordinates){return entries()[key('transit',origin,destination)] as TransitRoutes|undefined??null;}
+async function query<T extends Value>(kind:'transit'|'walk',origin:Coordinates,destination:Coordinates,signal?:AbortSignal):Promise<T>{signal?.throwIfAborted();const id=key(kind,origin,destination),hit=entries()[id];if(hit)return hit as T;let task=pending.get(id);if(!task){task=(async()=>{const response=await fetch('/api/tmap/'+kind,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({origin,destination}),signal:AbortSignal.timeout(55000)});let body;try{body=await response.json();}catch{throw new TmapError('NETWORK',502,'경로 응답을 읽지 못했습니다. 자동 재시도하지 않습니다.');}if(!response.ok)throw new TmapError(body.code??'UPSTREAM',response.status,body.error??'TMAP 경로 조회 실패');if(!tmapFresh(body))throw new TmapError('EXPIRED',502,'경로 자료의 유효기간이 만료되었습니다.');if(kind!=='transit'||(body.outbound?.status!=='error'&&body.inbound?.status!=='error'))entries()[id]=body;const keys=Object.keys(entries());for(const old of keys.slice(0,Math.max(0,keys.length-64)))delete entries()[old];try{sessionStorage.setItem(storage,JSON.stringify(memory));}catch{}return body as Value;})().finally(()=>pending.delete(id));pending.set(id,task);}const result=await task;signal?.throwIfAborted();return result as T;}
+export const fetchTmapRoutes=(origin:Coordinates,destination:Coordinates,signal?:AbortSignal)=>query<TransitRoutes&{expiresAt:string}>('transit',origin,destination,signal);
+export const fetchTmapWalking=(origin:Coordinates,destination:Coordinates,signal?:AbortSignal)=>query<WalkingRoute>('walk',origin,destination,signal);

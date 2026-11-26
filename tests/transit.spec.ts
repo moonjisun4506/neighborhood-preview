@@ -46,6 +46,7 @@ for(const [index,pair] of pairs.entries())test('real Web/URI transit '+pair.name
 });
 
 test('Web API errors, no-route and missing fare never generate transit data',async({page})=>{
+  test.skip(process.env.NEXT_PUBLIC_TRANSIT_ROUTE_PROVIDER!=='odsay','기존 ODsay 전용 UI fixture입니다. ODsay 모드에서 실행하며 TMAP 모드는 tmap.spec.ts가 검증합니다.');
   const origin:AddressRecord={id:'test-house',label:'테스트 집',address:'테스트 집 주소',coordinates:{lat:37.556,lng:126.903},source:'kakao'};await seed(page,origin);let stage=0;
   await page.route('https://api.odsay.com/v1/api/pointSearch?*',route=>route.fulfill({contentType:'application/json',body:JSON.stringify(stage===0?{error:[{code:'500',message:'[ApiKeyAuthFailed]'}]}:{result:{station:[]}})}));
   await page.route('**/api/locations/search?*',route=>route.fulfill({contentType:'application/json',body:JSON.stringify({results:[{id:'test-school',label:'테스트 학교',address:'테스트 학교 주소',coordinates:{lat:stage===2?37.5535:37.5525,lng:126.925},source:'kakao'}],hasMore:false})}));

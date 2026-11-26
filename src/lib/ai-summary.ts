@@ -4,8 +4,8 @@ export const summarySections={overview:'한 줄 생활환경 요약',facilities:
 export type SectionKey=keyof typeof summarySections;
 export const addressSummarySections={overview:'한눈에 보는 동네',facilities:'주변 생활 편의성',transit:'통학·출퇴근',rent:'주거비 참고',checks:'계약 전 확인할 점'} as const;
 export type AddressSectionKey=keyof typeof addressSummarySections;
-export type Evidence={id:string;section:SectionKey;text:string;source:string};
-export type AiSummary={id:string;mode:'address'|'compare';style?:'concise'|'cards';addressIds:string[];generatedAt:string;model:string;conditions:{radius:number;destination:string|null;days:number;roundTrip:boolean;month:string;type:string;min:number;max:number|null};sections:{key:SectionKey;title:string;items:{evidenceId:string;text:string;source:string}[]}[];evidence:Evidence[]};
+export type Evidence={id:string;section:SectionKey;text:string;source:string;expiresAt?:string};
+export type AiSummary={id:string;mode:'address'|'compare';style?:'concise'|'cards';addressIds:string[];generatedAt:string;model:string;expiresAt?:string;conditions:{radius:number;destination:string|null;days:number;roundTrip:boolean;month:string;type:string;min:number;max:number|null};sections:{key:SectionKey;title:string;items:{evidenceId:string;text:string;source:string}[]}[];evidence:Evidence[]};
 export type SummaryRequest={addresses:AddressRecord[];radius:number;destination:AddressRecord|null;days:number;roundTrip:boolean;month:string;type:string;min:number;max:number|null;transit:{addressId:string;nearby:TransitNearby|null;routes:TransitRoutes|null}[]};
 export function renderAddressPlan(plan:unknown,evidence:Evidence[]):AiSummary['sections']{
   if(!plan||typeof plan!=='object'||Array.isArray(plan))throw new Error('AI 카드 형식 확인 불가');

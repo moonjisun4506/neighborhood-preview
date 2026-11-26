@@ -19,4 +19,4 @@ export const legacyAddresses: AddressRecord[] = [
   { id: 'eungam', label: '기존 기록 · 응암동', address: '은평구 응암동 (상세 주소 미확인)', coordinates: null, source: 'legacy' },
 ];
 export {facilityCategories} from './facilities';
-export const demoNotice = '주소·장소·주변 생활시설은 카카오맵에서 조회합니다. 대중교통은 ODsay로 조회하며 인증 설정이 필요합니다. 월세는 국토교통부 지역 실거래 참고 통계이며 인증 설정이 필요합니다. AI는 사용자가 선택한 주소의 실제 조회 근거를 요약합니다. 시설 분류는 카카오 등록 정보 기준이며 직선거리는 도보 거리가 아닙니다.';
+export const demoNotice = '주소·장소·주변 생활시설은 카카오맵에서 조회합니다. 대중교통 경로·시설 도보 경로는 TMAP, 주변 정류장은 ODsay로 조회하며 인증 설정이 필요합니다. 월세는 국토교통부 지역 실거래 참고 통계이며 인증 설정이 필요합니다. AI는 사용자가 선택한 주소의 실제 조회 근거를 요약합니다. 시설 분류는 카카오 등록 정보 기준이며 직선거리는 도보 거리가 아닙니다.';

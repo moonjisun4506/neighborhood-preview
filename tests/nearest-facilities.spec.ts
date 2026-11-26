@@ -27,3 +27,6 @@ test('LIVE three selected houses show the same nearest two per category in the l
   }
   const output=info.outputPath('nearest-three-houses.json');await writeFile(output,JSON.stringify(report,null,2));await info.attach('nearest-three-houses.json',{path:output,contentType:'application/json'});
 });
+
+// Existing facility tests isolate pedestrian calls; actual TMAP is tested only with RUN_TMAP_LIVE=1.
+test.beforeEach(async({page})=>{await page.route('**/api/tmap/walk',r=>r.fulfill({status:503,json:{code:'TEST_ISOLATED',error:'도보 API 실검증은 별도 TMAP 검사에서 실행합니다.'}}));});

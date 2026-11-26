@@ -8,6 +8,7 @@ test('route adapter preserves real guidance fields and never derives a direction
   expect(()=>parseOdsayBody({error:[{code:'429',message:'Daily quota exceeded'}]},'web')).toThrow('일일 요청 한도');
 });
 test('ordered boarding, walking and transfer instructions plus explicit round-trip monthly calculator',async({page})=>{
+  test.skip(process.env.NEXT_PUBLIC_TRANSIT_ROUTE_PROVIDER!=='odsay','기존 ODsay 전용 UI fixture입니다. ODsay 모드에서 실행하며 TMAP 모드는 tmap.spec.ts가 검증합니다.');
   const origin={id:'guidance-home',label:'검증 집',address:'검증 집 주소',source:'kakao',coordinates:{lat:37.55,lng:126.91}},destination={id:'guidance-work',label:'검증 직장',address:'검증 직장 주소',source:'kakao',coordinates:{lat:37.57,lng:126.98}};
   await page.addInitScript(({origin,destination})=>localStorage.setItem('neighborhood-preview-v2',JSON.stringify({addresses:[origin],selectedId:origin.id,saved:[],compare:[],notes:{},layers:[],facilityLayerVersion:1,radius:500,destinationLocation:destination,commuteDays:20,commuteRoundTrip:false})),{origin,destination});
   await page.route('**/api/noise?**',r=>r.fulfill({json:{points:[],warnings:[],period:'검증',radius:500}}));let missingFare=false;
