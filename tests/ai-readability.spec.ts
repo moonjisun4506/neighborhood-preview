@@ -1,0 +1,35 @@
+import {test,expect,type Locator} from '@playwright/test';
+import type {AiSummary} from '../src/lib/ai-summary';
+const houses=[0,1,2].map(i=>({id:'readability-'+i,label:'가독성 검증 주소 '+i,address:'가독성 검증용 주소 '+i,source:'kakao',coordinates:{lat:37.55+i*.01,lng:126.91}}));
+const summary:AiSummary={id:'readability-fixture',mode:'address',style:'cards',addressIds:[houses[0].id],generatedAt:'2026-11-26T00:00:00Z',model:'UI fixture',conditions:{radius:500,destination:null,days:20,roundTrip:true,month:'202610',type:'sh',min:0,max:null},sections:[{key:'overview',title:'한눈에 보는 동네'},{key:'facilities',title:'주변 생활 편의성'},{key:'transit',title:'통학·출퇴근'},{key:'rent',title:'주거비 참고'},{key:'checks',title:'계약 전 확인할 점'}].map((s,i)=>({...s,key:s.key as AiSummary['sections'][number]['key'],items:[{evidenceId:'e'+i,text:'가독성 검증용 문장입니다. 조회되지 않은 정보는 확인이 필요합니다.',source:'가독성 검사 모의 응답'}]})),evidence:[{id:'e0',section:'overview',text:'가독성 검증용 출처 본문입니다.',source:'모의 데이터 · 실제 API 결과 아님'}]};
+async function checkContrast(scope:Locator){
+  const result=await scope.evaluate(root=>{
+    const parse=(s:string)=>{const v=s.match(/[\d.]+/g)?.map(Number)??[];return [v[0]??0,v[1]??0,v[2]??0,v[3]??1];};
+    const luminance=(rgb:number[])=>rgb.slice(0,3).map(v=>{const n=v/255;return n<=.04045?n/12.92:((n+.055)/1.055)**2.4;}).reduce((s,v,i)=>s+v*[.2126,.7152,.0722][i],0);
+    const failures:{text:string;ratio:number;color:string;background:number[]}[]=[];let checked=0;
+    const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);while(walker.nextNode()){const node=walker.currentNode,el=node.parentElement;if(!node.textContent?.trim()||!el||el.closest('.material-symbols-outlined,script,style')||!el.checkVisibility({checkVisibilityCSS:true,checkOpacity:true})||!el.getClientRects().length)continue;
+      let bg=[255,255,255];const parents:Element[]=[];for(let current:Element|null=el;current;current=current.parentElement)parents.unshift(current);for(const parent of parents){const c=parse(getComputedStyle(parent).backgroundColor);bg=bg.map((v,i)=>c[i]*c[3]+v*(1-c[3]));}
+      const style=getComputedStyle(el),c=parse(style.color),fg=bg.map((v,i)=>c[i]*c[3]+v*(1-c[3]));const l1=luminance(fg),l2=luminance(bg),ratio=(Math.max(l1,l2)+.05)/(Math.min(l1,l2)+.05);checked++;if(ratio<4.5)failures.push({text:node.textContent.trim().slice(0,60),ratio:Math.round(ratio*100)/100,color:style.color,background:bg});
+    }return {checked,failures};
+  });
+  expect(result.checked).toBeGreaterThan(0);expect(result.failures,'Visible AI text must have at least 4.5:1 contrast').toEqual([]);
+}
+for(const width of [1440,390])for(const scheme of ['light','dark'] as const)test(`AI, saved and comparison readability ${width}px ${scheme}`,async({page},info)=>{
+  test.setTimeout(90000);await page.setViewportSize({width,height:1000});await page.emulateMedia({colorScheme:scheme});let mode:'hold'|'error'|'success'='hold';let release:()=>void=()=>{};const gate=new Promise<void>(resolve=>{release=resolve;});
+  await page.addInitScript(houses=>{if(!localStorage.getItem('neighborhood-preview-v2'))localStorage.setItem('neighborhood-preview-v2',JSON.stringify({addresses:houses,selectedId:houses[0].id,saved:houses.map(a=>a.id),compare:houses.slice(0,2).map(a=>a.id),notes:{},layers:[],radius:500,facilityLayerVersion:1}));},houses);
+  await page.route('**/v2/maps/sdk.js?**',r=>r.abort());
+  await page.route('**/api/saved',r=>r.fulfill({json:{entries:houses.map((address,i)=>({address,memo:'',ai_summary:i===0?summary:i===1?{...summary,style:'concise'}:{...summary,style:undefined}}))}}));
+  await page.route('**/api/facilities?**',r=>r.fulfill({json:{source:'kakao',category:new URL(r.request().url()).searchParams.get('category'),places:[],limited:false}}));
+  await page.route('**/api/noise?**',r=>r.fulfill({json:{points:[],warnings:[],period:'모의 공개기간',radius:500}}));
+  await page.route('**/api/rent?**',r=>r.fulfill({json:{region:{name:'모의 지역'},month:'202610',type:'sh',statistics:{count:0,medianRent:null,medianDeposit:null,smallSample:true}}}));
+  await page.route('**/api.odsay.com/**',r=>r.fulfill({json:{result:{station:[]}}}));
+  await page.route('**/api/ai/summary',async r=>{if(mode==='hold')await gate;if(mode!=='success')return r.fulfill({status:503,json:{error:'가독성 검증용 오류 · 잠시 후 다시 확인해 주세요.'}});const compare=r.request().postDataJSON().addresses.length>1;return r.fulfill({json:{summary:compare?{...summary,mode:'compare',style:undefined}:summary}});});
+  await page.goto('/summary');const panel=page.getByRole('region',{name:'AI 생활환경 요약'});await expect(panel.getByRole('button',{name:'AI 요약하기',exact:true})).toBeEnabled();await expect(panel).not.toHaveClass(/advisor/);await panel.locator('.ai-data-notice>summary').click();await panel.locator('.ai-options>summary').click();await checkContrast(panel);
+  await panel.getByRole('button',{name:'AI 요약하기',exact:true}).click();await expect(panel.getByRole('button',{name:'조회 자료로 요약 중…'})).toBeVisible();await checkContrast(panel);mode='error';release();await expect(panel.getByRole('alert')).toBeVisible();await checkContrast(panel);
+  mode='success';await panel.getByRole('button',{name:'AI 요약하기',exact:true}).click();await expect(panel.locator('.summary-card')).toHaveCount(5);await panel.locator('.ai-summary-content>details>summary').click();await checkContrast(panel);expect(await panel.evaluate(el=>getComputedStyle(el).colorScheme)).toBe(scheme);await page.evaluate(()=>{scrollTo(0,0);const side=document.querySelector('.workspace-side');if(side)side.scrollTop=0;});await page.screenshot({path:info.outputPath('ai-summary.png'),fullPage:true});
+  await page.goto('/saved');const saved=page.locator('.saved-ai-summary');await expect(saved).toHaveCount(3);for(const item of await saved.all()){await item.locator(':scope>summary').click();await item.locator('.ai-summary-content>details>summary').click();await checkContrast(item);}await page.evaluate(()=>scrollTo(0,0));await page.screenshot({path:info.outputPath('saved-summaries.png'),fullPage:true});
+  await page.goto('/compare');await page.getByRole('button',{name:'같은 조건으로 비교 조회',exact:true}).click();await expect(page.getByRole('button',{name:'같은 조건으로 비교 조회',exact:true})).toBeEnabled();await page.getByRole('button',{name:'AI 차이점 요약하기',exact:true}).click();const comparison=page.locator('.ai-panel');await expect(comparison.locator('.ai-summary-content')).toBeVisible();await comparison.locator('.ai-summary-content>details>summary').click();await checkContrast(comparison);
+  // Tailwind is configured with class-based dark mode, independently of OS preference.
+  await page.emulateMedia({colorScheme:'light'});await page.evaluate(()=>{document.documentElement.classList.add('dark');document.body.style.color='white';});await checkContrast(comparison);expect(await comparison.evaluate(el=>getComputedStyle(el).colorScheme)).toBe('dark');await page.evaluate(()=>scrollTo(0,0));await page.screenshot({path:info.outputPath('comparison-dark-class.png'),fullPage:true});
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
+});

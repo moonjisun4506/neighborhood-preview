@@ -41,7 +41,7 @@ test('legacy records keep their notes and do not get a real-location marker',asy
 });
 test('mobile filters, radius and detail controls share state with desktop',async({page})=>{
   await seed(page);await page.setViewportSize({width:390,height:844});await page.goto('/explore');await page.getByRole('button',{name:'시설 필터',exact:true}).click();const cafe=page.getByRole('checkbox',{name:'일반 카페',exact:true});await cafe.uncheck();
-  await page.getByRole('button',{name:'1km',exact:true}).click();await page.getByRole('button',{name:'필터 닫기'}).click();await page.getByRole('tab',{name:'교통·소음',exact:true}).click();await expect(page.getByRole('region',{name:'학교 직장 목적지 등록'})).toBeVisible();await page.getByRole('tab',{name:'주변 시설',exact:true}).click();
+  await page.getByRole('button',{name:'1km',exact:true}).click();await page.getByRole('button',{name:'필터 닫기'}).click();await page.getByRole('tab',{name:'교통·소음·치안',exact:true}).click();await expect(page.getByRole('region',{name:'학교 직장 목적지 등록'})).toBeVisible();await page.getByRole('tab',{name:'주변 시설',exact:true}).click();
   await page.setViewportSize({width:1440,height:1000});await expect(cafe).not.toBeChecked();await page.reload();await expect(cafe).not.toBeChecked();await expect(page.getByRole('button',{name:'1km',exact:true})).toHaveAttribute('aria-pressed','true');
 });
 test('search endpoint rejects invalid inputs before making upstream calls',async({request})=>{

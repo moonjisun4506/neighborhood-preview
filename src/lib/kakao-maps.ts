@@ -1,14 +1,16 @@
 'use client';
 export interface LatLng {getLat():number;getLng():number;}
-export interface KakaoMap {getCenter():LatLng;setCenter(position:LatLng):void;panTo(position:LatLng):void;getLevel():number;setLevel(level:number):void;relayout():void;}
+export interface KakaoMap {getCenter():LatLng;setCenter(position:LatLng):void;panTo(position:LatLng):void;getLevel():number;setLevel(level:number):void;relayout():void;getProjection():{pointFromCoords(position:LatLng):{x:number;y:number}};}
 interface Overlay {setMap(map:KakaoMap|null):void;}
+interface AbstractOverlay extends Overlay {getProjection():{pointFromCoords(position:LatLng):{x:number;y:number}};getPanels():{overlayLayer:HTMLElement};onAdd():void;draw():void;onRemove():void;}
 export interface Marker extends Overlay {getPosition():LatLng;}
 export interface KakaoMaps {
   load(callback:()=>void):void;
   LatLng:new(lat:number,lng:number)=>LatLng;
   Map:new(container:HTMLElement,options:{center:LatLng;level:number})=>KakaoMap;
   Marker:new(options:{position:LatLng;map?:KakaoMap;title?:string;zIndex?:number})=>Marker;
-  CustomOverlay:new(options:{position:LatLng;content:HTMLElement;yAnchor?:number;zIndex?:number;map?:KakaoMap})=>Overlay;
+  CustomOverlay:new(options:{position:LatLng;content:HTMLElement;xAnchor?:number;yAnchor?:number;zIndex?:number;map?:KakaoMap})=>Overlay;
+  AbstractOverlay:new()=>AbstractOverlay;
   Circle:new(options:{center:LatLng;radius:number;strokeWeight:number;strokeColor:string;strokeOpacity:number;strokeStyle:string;fillColor:string;fillOpacity:number;map?:KakaoMap})=>Overlay;
   event:{addListener(target:KakaoMap,event:string,listener:()=>void):void;removeListener(target:KakaoMap,event:string,listener:()=>void):void;};
 }

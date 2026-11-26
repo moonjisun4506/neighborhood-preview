@@ -5,7 +5,10 @@ import {monthlyTransportCost,validCoordinates,type TransitNearby,type TransitRou
 import {rentMonths,housingTypes,type RentResult} from './rent';
 import {validAddress} from './saved.server';
 import type {SummaryRequest,Evidence,SectionKey} from './ai-summary';
+import {safetyData} from './safety.server';
+import {safetyEvidenceText,safetyEvidenceSource} from './safety';
 import {nearbyNoise} from './noise.server';
+import {addressEvidence} from './address-evidence.server';
 export function validateSummaryRequest(value:unknown):value is SummaryRequest{
   if(!value||typeof value!=='object')return false;const v=value as SummaryRequest;
   return Array.isArray(v.addresses)&&v.addresses.length>=1&&v.addresses.length<=3&&new Set(v.addresses.map(a=>a?.id)).size===v.addresses.length&&v.addresses.every(a=>validAddress(a)&&a.source==='kakao'&&validCoordinates(a.coordinates))&&[300,500,1000].includes(v.radius)&&(v.destination===null||(validAddress(v.destination)&&v.destination.source==='kakao'&&validCoordinates(v.destination.coordinates)))&&Number.isInteger(v.days)&&v.days>=0&&v.days<=31&&typeof v.roundTrip==='boolean'&&rentMonths().includes(v.month)&&Object.hasOwn(housingTypes,v.type)&&Number.isSafeInteger(v.min)&&v.min>=0&&(v.max===null||(Number.isSafeInteger(v.max)&&v.max>=v.min))&&Array.isArray(v.transit)&&v.transit.length<=3;
@@ -21,7 +24,7 @@ function cleanRoutes(value:TransitRoutes|null,origin:{lat:number;lng:number},des
   if(!value||value.provider!=='odsay'||!same(value.origin,origin)||!destination?.coordinates||!same(value.destination,destination.coordinates)||!fresh(value.fetchedAt))return null;
   for(const direction of [value.outbound,value.inbound]){
     if(!direction||!['ok','no_route','error'].includes(direction.status)||!Array.isArray(direction.paths)||direction.paths.length>100)return null;
-    for(const p of direction.paths)if(!p||!(p.minutes===null||(Number.isFinite(p.minutes)&&p.minutes>=0&&p.minutes<=1440))||!(p.fare===null||(Number.isFinite(p.fare)&&p.fare>=0&&p.fare<=100000))||!Array.isArray(p.legs)||p.legs.length>30)return null;
+    for(const p of direction.paths)if(!p||!(p.minutes===null||(Number.isFinite(p.minutes)&&p.minutes>=0&&p.minutes<=1440))||!(p.fare===null||(Number.isFinite(p.fare)&&p.fare>=0&&p.fare<=100000))||!Array.isArray(p.legs)||p.legs.length>30||p.legs.some(l=>!l||!['walk','bus','subway'].includes(l.mode)||!Array.isArray(l.lines)||l.lines.length>30||l.lines.some(name=>typeof name!=='string'||name.length>100)))return null;
   }return value;
 }
 type PublicData={facilities:{label:string;data?:FacilityResponse}[];rent?:RentResult};
@@ -56,21 +59,8 @@ export async function collectEvidence(input:SummaryRequest){
     if(missing)add('checks',`${prefix}생활시설 ${missing}개 종류의 조회에 실패했습니다. 미조회 항목은 다시 확인해 주세요.`,'조회 상태');
     let noisePoint:import('./noise').NoisePoint|undefined;
     try{const noise=await nearbyNoise(address.coordinates!,input.radius);noisePoint=noise.points[0];for(const point of noise.points.slice(0,2))add('checks',`${prefix}공식 소음 측정 지점 ${point.name}(선택 주소에서 직선 약 ${Math.round(point.distanceMeters)}m)의 ${point.measuredPeriod} 자료: ${point.metrics.map(m=>`${m.label} ${m.db} dB`).join(', ')}. 출처: ${point.source} (${point.sourceUrl}). 측정 지점의 과거 참고값으로, 이 집의 실제 소음·위험 등급이 아닙니다.`,'국가소음정보시스템 공식 측정자료');}catch{/* Missing or failed noise observations never become inferred noise values. */}
-    if(input.addresses.length===1){
-      const brief=(section:SectionKey,text:string,source:string)=>add(section,text,'간단 요약 · '+source);
-      brief('overview',`${address.address} 주변 반경 ${input.radius}m의 조회 자료를 정리했으며, 거주 적합성이나 주소 순위를 판단하지 않습니다.`,'선택 주소');
-      if(available.length){for(const f of available){const nearest=[...f.data!.places].sort((a,b)=>a.distanceMeters-b.distanceMeters)[0];brief('facilities',`조회된 ${f.label} 중 가장 가까운 ${nearest.name}은 직선 약 ${Math.round(nearest.distanceMeters)}m에 있으며, 실제 보행 동선과 운영시간은 별도 확인이 필요합니다.`,'카카오 실제 시설 조회');}}
-      else brief('facilities','주변 생활시설 정보가 부족해 생활 편의성을 확인할 수 없습니다.','시설 자료 미확인');
-      const station=nearby?.stations[0];
-      const observedAt=routes?.fetchedAt??nearby?.fetchedAt;
-      const observed=observedAt?` (${new Date(observedAt).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'})} 조회)` : '';
-      const tripCost=out?monthlyTransportCost(out.fare,back?.fare??null,input.days,true):null;
-      brief('transit',`${station?`가까운 ${station.kind==='bus'?'버스정류장':'지하철역'}은 ${station.name}(직선 약 ${Math.round(station.distanceMeters)}m)이며, `:''}${out?`등록 목적지까지 조회 경로 중 최단 ${out.minutes}분이고 월 ${input.days}일 왕복 비용은 ${tripCost===null?'정보 없음':tripCost.toLocaleString('ko-KR')+'원'}`:'학교·직장 경로와 교통비는 정보 없음으로, 교통 탭에서 직접 조회가 필요합니다'}${observed}${out?'이며 실제 운행과 비용은 달라질 수 있습니다':''}.`,'ODsay 조회 자료·입력 일수');
-      const rent=data.rent;
-      brief('rent',rent?`${rent.region.name} ${rent.month} ${housingTypes[rent.type]} 월세 거래 ${rent.statistics.count}건의 중앙값은 ${rent.statistics.medianRent===null?'정보 없음':rent.statistics.medianRent.toLocaleString('ko-KR')+'만원'}이며, ${rent.statistics.smallSample?'표본이 5건 미만인 ':''}지역 참고 통계로 개별 집의 월세가 아닙니다.`:'지역 월세 실거래 자료가 없어 주거비는 별도 확인이 필요합니다.','국토교통부 지역 참고 통계');
-      brief('benefits',noisePoint?`${noisePoint.source}의 ${noisePoint.name}(직선 약 ${Math.round(noisePoint.distanceMeters)}m), ${noisePoint.measuredPeriod} 측정값은 ${noisePoint.metrics.map(m=>m.label+' '+m.db+' dB').join(' / ')}이며 집 자체의 소음이 아닙니다.`:'해당 주소의 소음 정보는 확인할 수 없습니다.','공식 소음 측정자료·조회 한계');
-      brief('checks','소음·치안은 추정할 수 없으며, 계약 전 채광·관리비·관리 상태와 실제 통학 시간대의 동선을 직접 확인해 주세요.','추가 확인 안내');
-    }
+    if(input.addresses.length===1)for(const fact of addressEvidence(input,address,data.facilities,data.rent,nearby,routes,noisePoint))add(fact.section,fact.text,fact.source);
+    try{const {result}=await safetyData(address.coordinates!),text=safetyEvidenceText(result);if(text)add('checks',prefix+text,(input.addresses.length===1?'주소 카드 · ':'')+safetyEvidenceSource);}catch{/* Only successfully received official imagery is evidence. */}
   }
   if(input.addresses.length>1){add('overview','선택한 주소들의 같은 조건에서 조회된 시설·교통·월세 정보를 비교했습니다. 주소의 순위나 거주 적합성은 판단하지 않습니다.','공통 비교 조건');
     for(let c=0;c<facilityCategories.length;c++){if(all.every(d=>d.facilities[c].data))add('facilities',`${facilityCategories[c][1]}의 같은 반경 내 조회 건수는 ${input.addresses.map((a,i)=>`${a.address} ${all[i].facilities[c].data!.places.length}곳`).join(', ')}입니다. 검색에 반환된 건수 차이이며 지역의 우열을 의미하지 않습니다.`,'카카오 동일 조건 비교');}}

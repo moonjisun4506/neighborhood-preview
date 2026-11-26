@@ -22,6 +22,7 @@ const pairs=[
   {name:'롯데월드타워 → 서울시청',origin:'서울 송파구 올림픽로 300',destination:'서울 중구 세종대로 110',type:'work'},
 ];
 for(const [index,pair] of pairs.entries())test('real Web/URI transit '+pair.name,async({page,request},info)=>{
+  test.skip(process.env.RUN_ODSAY_LIVE!=='1','ODsay 실제 호출은 일일 한도 보호를 위해 RUN_ODSAY_LIVE=1 설정 시에만 실행합니다.');
   test.setTimeout(90000);
   const response=await request.get('/api/locations/search',{params:{q:pair.origin}});expect(response.ok()).toBe(true);const origin:AddressRecord=(await response.json()).results[0];expect(origin.coordinates).toBeTruthy();await seed(page,origin);
   await page.setViewportSize(index===2?{width:390,height:844}:{width:1440,height:1000});

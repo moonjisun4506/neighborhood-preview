@@ -2,7 +2,9 @@
 
 사용자가 직접 검색한 집 주소의 주변 생활환경을 지도에서 확인하고, 관심 주소를 저장·메모·비교하는 웹앱입니다. AI는 실제 조회한 자료를 요약하며 주소를 추천하거나 순위를 매기지 않습니다.
 
-시설 목록과 지도 마커는 모두 선택한 집 좌표를 기준으로 종류별 가장 가까운 2곳만 직선거리순으로 표시합니다. 1곳이면 1곳, 없으면 검색 결과 없음으로 표시합니다. 자세한 검증은 [NEAREST_FACILITIES_REPORT.md](./NEAREST_FACILITIES_REPORT.md)를 확인하세요. ODsay 조회는 같은 브라우저 탭에서 24시간 캐시하고 새로고침·탭 전환·AI 요약의 중복 호출을 줄입니다. 한도 오류 후 자동 재시도하지 않습니다. AI 단일 주소 요약은 실제 근거에 따른 6문장으로 간소화했습니다. 소음 자료가 없으면 집의 소음은 확인할 수 없다고 안내합니다. 이전 간소화 변경·캐시 범위는 [CONCISE_ENVIRONMENT_REPORT.md](./CONCISE_ENVIRONMENT_REPORT.md)에 있습니다.
+교통·소음 탭의 **주변 치안 정보**에서 생활안전지도 범죄주의구간 WMS를 켜고 끌 수 있습니다. 선택 주소 기준 1km를 둘러싼 사각 영상이며 모서리에는 약 1.42km까지의 자료가 포함될 수 있습니다. 사건 위치·발생 건수·집의 안전 점수를 제공하지 않습니다. 서버 전용 `SAFEMAP_API_KEY`를 사용하며 상세 검증·이용 조건·기준 시점은 [SAFETY_REPORT.md](./SAFETY_REPORT.md)를 확인하세요.
+
+시설 목록과 지도 마커는 모두 선택한 집 좌표를 기준으로 종류별 가장 가까운 2곳만 직선거리순으로 표시합니다. 1곳이면 1곳, 없으면 검색 결과 없음으로 표시합니다. 자세한 검증은 [NEAREST_FACILITIES_REPORT.md](./NEAREST_FACILITIES_REPORT.md)를 확인하세요. ODsay 조회는 같은 브라우저 탭에서 24시간 캐시하고 새로고침·탭 전환·AI 요약의 중복 호출을 줄입니다. 한도 오류 후 자동 재시도하지 않습니다. AI 단일 주소 요약은 **한눈에 보는 동네·주변 생활 편의성·통학 및 출퇴근·주거비 참고·계약 전 확인할 점**의 5개 카드로 표시합니다. 도보 시간 기능은 제외했으며 시설 상세와 AI는 직선거리만 사용합니다. 최신 내용은 [AI_CARDS_REPORT.md](./AI_CARDS_REPORT.md), 이전 간소화 변경·캐시 범위는 [CONCISE_ENVIRONMENT_REPORT.md](./CONCISE_ENVIRONMENT_REPORT.md)에 있습니다.
 
 ## 주요 기능
 
@@ -135,10 +137,15 @@ npm run typecheck
 npm run build
 npm test
 node scripts/check-client-secrets.cjs
+node scripts/check-git-secrets.cjs
 ```
 
 브라우저 테스트는 설치된 Google Chrome을 사용하며 실제 카카오 키·허용 도메인·외부 네트워크가 필요합니다. `npm test`에는 실제 주소 3곳을 조회하는 통합 테스트가 포함됩니다. `test-results/screens/`에 반응형 스크린샷, `test-results/kakao-live-1.png`~`3.png`에 실제 지도 스크린샷을 생성합니다. 비밀 키 검사는 빌드 후 `.next/static`에서 설정된 서버 키 값이 포함되는지 검사하며 값 자체는 출력하지 않습니다.
 
+ODsay 실제 정류장·경로 통합 검사 6개는 일일 호출 한도를 보호하기 위해 기본적으로 건너뜁니다. 한도가 남아 있을 때 PowerShell에서 `$env:RUN_ODSAY_LIVE='1'`을 설정하고 실행하세요. 건너뛴 검사는 실제 API 성공으로 집계하지 않습니다. `check-git-secrets.cjs`는 Git에 포함될 후보 파일에서 설정된 키와 DB 접속정보를 검사하며 값은 출력하지 않습니다.
+
 실제 배포 검증은 PowerShell에서 `$env:PRODUCTION_URL='https://배포주소'`를 설정하고 `npm.cmd test -- tests/production.spec.ts`로 실행합니다. 지정하지 않으면 이 3개 검사는 건너뜁니다. 실제 API·AI를 호출하고 격리된 익명 세션에 임시 저장한 주소·메모·요약은 검사 후 삭제합니다. ODsay 한도 오류는 성공 경로로 집계하지 않습니다.
 
 최신 시설 연결 결과는 [FACILITIES_REPORT.md](./FACILITIES_REPORT.md), 이전 카카오 지도 연결 기록은 [KAKAO_MAP_REPORT.md](./KAKAO_MAP_REPORT.md)를 참고하세요. 시설 검증에는 실제 API 10종 × 3개 반경, 실제 마커 클릭/거리/PC·모바일 필터와 오류·빈 결과·늦은 응답·10개 토글 검사가 포함됩니다. 실제 조회 결과 표는 `test-results/**/real-facility-results.json`, 화면은 `test-results/facilities-live-desktop.png`와 `facilities-live-mobile.png`에 생성됩니다.
+
+치안 지도 표시 점검은 [SAFETY_DISPLAY_REPORT.md](./SAFETY_DISPLAY_REPORT.md)를 참고하세요. 교통·소음 탭에서 주변 치안 정보를 열고 지도 표시를 ON으로 전환합니다. 실제 PNG의 투명 여부와 공식 범례 색상을 구분하며, 투명한 영상은 안전한 지역을 뜻하지 않습니다. 집 중심 1km 원을 둘러싼 사각 WMS 영상의 모서리에는 약 1.42km 거리의 자료도 포함됩니다.

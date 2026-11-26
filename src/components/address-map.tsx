@@ -11,6 +11,8 @@ import {useNoise} from './noise-provider';
 import {NoisePointDetails} from './noise-panel';
 import {noiseDisclaimer} from '@/lib/noise';
 import {MemoLauncher} from './memo-panel';
+import {useSafety} from './safety-provider';
+import {inspectSafetyRaster} from '@/lib/safety-raster';
 export function AddressMap({mode='facilities'}:{mode?:'facilities'|'transport'|'summary'}){
   const {data,selected,update,ready}=useApp();const container=useRef<HTMLDivElement>(null);
   const {places:allPlaces,focusId,focus,loading:facilitiesLoading}=useFacilities();
@@ -18,6 +20,7 @@ export function AddressMap({mode='facilities'}:{mode?:'facilities'|'transport'|'
   const places=useMemo(()=>mode==='facilities'?allPlaces:[],[mode,allPlaces]);
   const stations=useMemo(()=>mode==='transport'?allStations:[],[mode,allStations]);
   const noise=useNoise();const noisePoints=useMemo(()=>mode==='transport'&&noise.visible?noise.state?.result?.points??[]:[],[mode,noise.visible,noise.state?.result]);const focusedNoise=noisePoints.find(p=>p.id===noise.focusId);
+  const safety=useSafety();const safetyResult=safety.state?.result;
   const live=useRef({data,update,selected});live.current={data,update,selected};
   const map=useRef<KakaoMap|null>(null);const sdk=useRef<KakaoMaps|null>(null);const marker=useRef<Marker|null>(null);
   const [loaded,setLoaded]=useState(false);const [error,setError]=useState('');const [attempt,setAttempt]=useState(0);const [level,setLevel]=useState(4);
@@ -80,7 +83,7 @@ export function AddressMap({mode='facilities'}:{mode?:'facilities'|'transport'|'
       const symbol=document.createElement('span');symbol.className='material-symbols-outlined';symbol.setAttribute('aria-hidden','true');symbol.textContent=facilityCategories.find(c=>c[0]===place.category)?.[2]??'place';button.appendChild(symbol);
       if(group.length>1){const count=document.createElement('span');count.className='facility-marker-count';count.textContent=String(group.length);button.appendChild(count);}
       button.onclick=()=>focus(place.id);
-      return new api.CustomOverlay({map:activeMap,position:new api.LatLng(place.coordinates.lat,place.coordinates.lng),content:button,yAnchor:place.distanceMeters<25?-.3:1,zIndex:5});
+      return new api.CustomOverlay({map:activeMap,position:new api.LatLng(place.coordinates.lat,place.coordinates.lng),content:button,yAnchor:place.distanceMeters<25?-.3:1,zIndex:15});
     });
     return()=>overlays.forEach(overlay=>overlay.setMap(null));
   },[loaded,places,focus]);
@@ -112,11 +115,26 @@ export function AddressMap({mode='facilities'}:{mode?:'facilities'|'transport'|'
     if(focused&&loaded&&sdk.current)map.current?.panTo(new sdk.current.LatLng(focused.coordinates.lat,focused.coordinates.lng));
   },[focused?.id,loaded]);
   const center=data.mapCenter;
+  useEffect(()=>{
+    const api=sdk.current,activeMap=map.current,result=safetyResult;if(!loaded||!api||!activeMap||mode!=='transport'||!safety.visible||safety.layerError||result?.status!=='available'||!result.imageUrl)return;
+    const bounds=result.bounds,wrapper=document.createElement('div');wrapper.className='safety-overlay';wrapper.dataset.radius='1000';wrapper.dataset.originLat=String(result.origin.lat);wrapper.dataset.originLng=String(result.origin.lng);const img=document.createElement('img');img.className='safety-wms-image';img.alt='공식 범죄주의구간 밀도분석 지도 · 개별 사건 위치 아님';img.width=512;img.height=512;wrapper.appendChild(img);let live=true;
+    img.onerror=()=>{if(live)safety.setLayerError(true);};img.onload=()=>{if(!live)return;try{const canvas=document.createElement('canvas');canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;const context=canvas.getContext('2d');if(!context)throw new Error('canvas');context.drawImage(img,0,0);safety.setRaster(inspectSafetyRaster(context.getImageData(0,0,canvas.width,canvas.height).data,result.legend??[]));}catch{if(live)safety.setLayerError(true);}};img.src=result.imageUrl;
+    const nw=new api.LatLng(bounds.north,bounds.west),ne=new api.LatLng(bounds.north,bounds.east),sw=new api.LatLng(bounds.south,bounds.west),se=new api.LatLng(bounds.south,bounds.east);
+    class SafetyOverlay extends api.AbstractOverlay{
+      onAdd(){this.getPanels().overlayLayer.appendChild(wrapper);}
+      draw(){const projection=this.getProjection(),a=projection.pointFromCoords(nw),b=projection.pointFromCoords(ne),c=projection.pointFromCoords(sw),d=projection.pointFromCoords(se);const sx=(b.x-a.x)/512,sy=(b.y-a.y)/512,tx=(c.x-a.x)/512,ty=(c.y-a.y)/512;img.style.transform=`matrix(${sx},${sy},${tx},${ty},${a.x},${a.y})`;wrapper.dataset.projectionError=String(Math.hypot(b.x+c.x-a.x-d.x,b.y+c.y-a.y-d.y)/Math.max(.0001,Math.sqrt(Math.abs(sx*ty-sy*tx))));}
+      onRemove(){wrapper.remove();}
+    }
+    const overlay=new SafetyOverlay();overlay.setMap(activeMap);const circle=new api.Circle({map:activeMap,center:new api.LatLng(result.origin.lat,result.origin.lng),radius:1000,strokeWeight:2,strokeColor:'#5b477a',strokeOpacity:.8,strokeStyle:'dash',fillColor:'#5b477a',fillOpacity:0});
+    return()=>{live=false;overlay.setMap(null);circle.setMap(null);img.removeAttribute('src');};
+  },[loaded,mode,safety.visible,safety.layerError,safetyResult,safety.setLayerError,safety.setRaster]);
   return <section className="address-map" aria-label="선택 주소 카카오 지도"><div className="map-demo-label">카카오맵 · {selected?.source==='kakao'?'선택한 기준 주소 고정':'주소를 검색해 기준 위치를 선택하세요'}</div><div ref={container} className="kakao-map-canvas" data-testid="map-canvas" data-map-ready={loaded} data-marker-lat={markerPosition?.lat??''} data-marker-lng={markerPosition?.lng??''} data-map-level={level}/>
+    {mode==='transport'&&safety.visible&&!safety.layerError&&safetyResult?.status==='available'&&<a className="safety-map-credit" href={safetyResult.sourceUrl} target="_blank" rel="noreferrer">생활안전지도·경찰청 · 1km 기준 · 범죄주의구간(개별 사건 아님)</a>}
+    {mode==='transport'&&safety.visible&&!safety.layerError&&safetyResult?.status==='available'&&Boolean(safetyResult.legend?.length)&&<div className="safety-map-legend" role="group" aria-label="범죄주의구간 공식 범례"><strong>공식 밀도분석 범례</strong><div>{safetyResult.legend!.map(item=><i key={item.label} title={item.label} style={{background:item.color}}/>)}</div><small>{safetyResult.legend![0].label} ~ {safetyResult.legend!.at(-1)!.label} · 집의 위험 등급 아님</small></div>}
     {focusedNoise&&<div className="facility-popup noise-popup" role="dialog" aria-label="소음 측정 지점 상세"><button type="button" className="facility-popup-close" aria-label="소음 상세 닫기" onClick={()=>noise.focus(null)}>×</button><NoisePointDetails point={focusedNoise}/><small>{noiseDisclaimer}</small></div>}
     {!loaded&&<div className="kakao-map-status" role={error?'alert':'status'}>{error?<><p>{error}</p><Button onClick={()=>setAttempt(v=>v+1)}>지도 다시 불러오기</Button></>:<p>카카오 지도를 불러오는 중입니다…</p>}</div>}
     <div className="map-controls"><Button disabled={!loaded||level<=1} onClick={()=>map.current?.setLevel(Math.max(1,(map.current?.getLevel()??4)-1))}>＋ 확대</Button><Button disabled={!loaded||level>=14} onClick={()=>map.current?.setLevel(Math.min(14,(map.current?.getLevel()??4)+1))}>− 축소</Button><Button disabled={!loaded||!coordinate} onClick={()=>{if(coordinate&&sdk.current)map.current?.panTo(new sdk.current.LatLng(coordinate.lat,coordinate.lng));}}>선택 주소로 복귀</Button></div>
-    {focused&&<div className="facility-popup" role="dialog" aria-label="시설 상세 정보"><button type="button" className="facility-popup-close" aria-label="시설 상세 닫기" onClick={()=>focus(null)}>×</button><span className="eyebrow">{facilityCategories.find(c=>c[0]===focused.category)?.[1]} · 카카오 조회 결과</span><h3>{focused.name}</h3>{coLocated.length>1&&<div className="co-located-places"><small>같은 위치의 {coLocated.length}개 장소</small>{coLocated.map(place=><button type="button" key={place.id} aria-pressed={place.id===focusId} onClick={()=>focus(place.id)}>{place.name}</button>)}</div>}<p>{focused.address}</p>{focused.jibunAddress!==focused.address&&<p>지번: {focused.jibunAddress}</p>}<strong>기준 주소에서 직선거리 약 {Math.round(focused.distanceMeters)}m</strong><small>도보 경로·시간과 다릅니다.</small>{focused.placeUrl&&<a href={focused.placeUrl} target="_blank" rel="noopener noreferrer">카카오맵 장소 정보 ↗</a>}</div>}
+    {focused&&<div className="facility-popup" role="dialog" aria-label="시설 상세 정보"><button type="button" className="facility-popup-close" aria-label="시설 상세 닫기" onClick={()=>focus(null)}>×</button><span className="eyebrow">{facilityCategories.find(c=>c[0]===focused.category)?.[1]} · 카카오 조회 결과</span><h3>{focused.name}</h3>{coLocated.length>1&&<div className="co-located-places"><small>같은 위치의 {coLocated.length}개 장소</small>{coLocated.map(place=><button type="button" key={place.id} aria-pressed={place.id===focusId} onClick={()=>focus(place.id)}>{place.name}</button>)}</div>}<strong>기준 주소에서 직선거리 약 {Math.round(focused.distanceMeters)}m</strong><small>도보 경로·시간과 다릅니다.</small>{focused.placeUrl&&<a href={focused.placeUrl} target="_blank" rel="noopener noreferrer">카카오맵 장소 정보 ↗</a>}</div>}
     {focusedStation&&<div className="facility-popup transit-popup" role="dialog" aria-label="정류장 상세 정보"><button type="button" className="facility-popup-close" aria-label="정류장 상세 닫기" onClick={()=>focusStation(null)}>×</button><span className="eyebrow">ODsay 실제 조회 · {focusedStation.kind==='bus'?'버스정류장':'지하철역'}</span><h3>{focusedStation.name}</h3><p>{focusedStation.lineName??'노선 정보 없음'}</p>{focusedStation.arsId&&<p>정류장 번호 {focusedStation.arsId}</p>}<strong>기준 주소에서 직선거리 약 {Math.round(focusedStation.distanceMeters)}m</strong></div>}
     {loaded&&coordinate&&<div className="facility-map-status" role="status">{mode==='facilities'?`시설 ${places.length}곳${facilitiesLoading?' · 조회 중…':''}`:mode==='transport'?`정류장 ${stations.length}곳 · 소음 지점 ${noisePoints.length}곳`:'선택한 집 위치'} · 지도 기본 POI와 별개</div>}
     <div className="map-state"><div data-testid="selected-address" data-address-id={selected?.id??''}><strong>기준 주소</strong><span>{selected?.address??'선택 안 됨'}</span></div><div data-testid="map-center"><strong>지도 화면 중심</strong><span>{loaded&&center?`${center.lat.toFixed(6)}, ${center.lng.toFixed(6)}`:'지도 로딩 대기'}</span></div>{selected&&selected.source!=='kakao'&&<small>기존 미확인·예시 기록에는 기준 마커를 표시하지 않습니다. 주소를 다시 검색해 주세요.</small>}<small>지도를 드래그해도 선택한 기준 주소와 마커는 변경되지 않습니다.</small></div>
