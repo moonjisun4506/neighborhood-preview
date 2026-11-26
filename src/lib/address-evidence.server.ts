@@ -4,6 +4,7 @@ import {monthlyTransportCost,type TransitNearby,type TransitRoutes} from './tran
 import {housingTypes,type RentResult} from './rent';
 import type {NoisePoint} from './noise';
 import type {Evidence,SectionKey,SummaryRequest} from './ai-summary';
+import {nearbyKindFact} from './nearby-stations';
 export function addressEvidence(input:SummaryRequest,address:AddressRecord,facilities:{label:string;data?:FacilityResponse}[],rent:RentResult|undefined,nearby:TransitNearby|null,routes:TransitRoutes|null,noisePoint:NoisePoint|undefined):Omit<Evidence,'id'>[]{
   const facts:Omit<Evidence,'id'>[]=[];const add=(section:SectionKey,text:string,source:string)=>facts.push({section,text,source:'주소 카드 · '+source});
   const groups=facilities.map(f=>({...f,nearest:f.data?nearestFacilities(address.coordinates!,f.data.places,f.data.category,input.radius):[]}));
@@ -19,7 +20,7 @@ export function addressEvidence(input:SummaryRequest,address:AddressRecord,facil
   for(const f of main){const warning=f.data!.limited||f.data!.warning?'일부 반환된 결과 중 ':'';add('facilities',`${f.label}: ${warning}${f.nearest.map(p=>`${p.name}(직선 약 ${Math.round(p.distanceMeters)}m)`).join(', ')}입니다.`,'카카오 실제 시설 조회');}
   if(!main.length)add('facilities','주변 생활시설은 미확인입니다. 검색 결과가 없거나 조회가 완료되지 않은 항목은 시설이 없다고 단정할 수 없습니다.','시설 자료 미확인');
   add('facilities','시설 거리는 선택한 집 좌표 기준 직선거리이며, 보행 경로·도보 시간이나 실제 출입구까지의 거리가 아닙니다.','거리 해석 안내');
-  if(nearby){const nearest=['bus','subway'].flatMap(kind=>{const p=nearby.stations.find(s=>s.kind===kind);return p?[`${kind==='bus'?'버스정류장':'지하철역'} ${p.name}(직선 약 ${Math.round(p.distanceMeters)}m)`]:[];});add('transit',nearest.length?`주변 조회 결과: ${nearest.join(', ')}입니다.`:'같은 반경 안에서 조회된 버스정류장·지하철역 정보가 없습니다.','ODsay 주변 정류장 응답');}
+  if(nearby)for(const kind of ['bus','subway'] as const){const fact=nearbyKindFact(nearby,kind);add('transit',fact.text,fact.source);}
   if(out){const rides=out.legs.filter(l=>l.mode!=='walk'),lines=rides.map(l=>l.lines.join(' 또는 ')).filter(Boolean);const transfers=out.transfers;
     add('transit',`등록한 ${input.destination!.address}까지 조회 경로 중 최단 ${out.minutes}분이며, 노선은 ${lines.length?lines.join(' → '):'미제공'}, 환승은 ${transfers===null?'미확인':transfers+'회'}입니다.`,`${routes?.provider==='tmap'?'TMAP':'ODsay'} 조회 경로·조회 자료`);
     const cost=monthlyTransportCost(out.fare,back?.fare??null,input.days,true);add('transit',cost===null?'월 예상 교통비는 미확인입니다. 실제 가는 편·오는 편 요금이 모두 있어야 계산합니다.':`월 ${input.days}일 왕복 예상 교통비는 ${cost.toLocaleString('ko-KR')}원 (계산식: (${out.fare!.toLocaleString('ko-KR')}원 + ${back!.fare!.toLocaleString('ko-KR')}원) × ${input.days}일)이며 할인·실제 지출은 달라질 수 있습니다.`,`${routes?.provider==='tmap'?'TMAP':'ODsay'} 실제 왕복 요금·입력 일수`);

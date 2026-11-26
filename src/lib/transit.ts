@@ -1,6 +1,7 @@
 import type {Coordinates} from './demo-data';
-export type TransitStation={id:string;name:string;kind:'bus'|'subway';coordinates:Coordinates;distanceMeters:number;lineName:string|null;arsId:string|null};
-export type TransitNearby={provider:'odsay';origin:Coordinates;radius:number;stations:TransitStation[];fetchedAt:string};
+export type TransitStation={id:string;name:string;kind:'bus'|'subway';coordinates:Coordinates;distanceMeters:number;lineName:string|null;arsId:string|null;source?:string;sourceUrl?:string};
+export type NearbySource={status:'ok'|'empty'|'partial'|'config_error'|'auth_error'|'permission_error'|'rate_limited'|'unavailable'|'unsupported';source:string;sourceUrl:string;message:string;code?:string};
+export type TransitNearby={provider:'odsay'|'public';origin:Coordinates;radius:number;stations:TransitStation[];fetchedAt:string;sources?:{bus:NearbySource;subway:NearbySource}};
 export type TransitLeg={mode:'bus'|'subway'|'walk';minutes:number|null;lines:string[];startName:string|null;endName:string|null;direction?:string|null;wayCode?:1|2|null;distanceMeters?:number|null;stationCount?:number|null;startExit?:string|null;endExit?:string|null;transferDoor?:string|null};
 export type TransitPath={id:string;minutes:number|null;fare:number|null;transfers:number|null;legs:TransitLeg[]};
 export type TransitDirection={status:'ok'|'no_route'|'error';paths:TransitPath[];message?:string;code?:string};

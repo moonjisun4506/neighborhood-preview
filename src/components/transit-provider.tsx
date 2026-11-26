@@ -3,7 +3,7 @@ import {createContext,useContext,useEffect,useMemo,useRef,useState,type ReactNod
 import {usePathname} from 'next/navigation';
 import {useApp} from './app-provider';
 import type {TransitStation,TransitNearby,TransitRoutes} from '@/lib/transit';
-import {fetchTransitNearby,fetchTransitRoutes,cachedTransitRoutes} from '@/lib/transit-client';
+import {fetchTransitNearby,fetchTransitRoutes,cachedTransitRoutes,clearTransitNearby} from '@/lib/transit-client';
 import {OdsayError} from '@/lib/odsay-data';
 import {TmapError} from '@/lib/tmap';
 type NearbyState={key:string;status:'loading'|'success'|'error';data?:TransitNearby;error?:string;code?:string};
@@ -15,7 +15,7 @@ export function TransitProvider({children}:{children:ReactNode}){
   const origin=selected?.source==='kakao'?selected.coordinates:null;const destination=data.destinationLocation?.source==='kakao'?data.destinationLocation.coordinates:null;
   const originKey=origin?`${selected!.id}|${origin.lat}|${origin.lng}|${data.radius}`:'';
   const routeKey=origin&&destination?`${selected!.id}|${origin.lat}|${origin.lng}|${data.destinationLocation!.id}|${destination.lat}|${destination.lng}`:'';
-  const active=pathname==='/transport';
+  const active=pathname==='/'||pathname==='/explore';
   useEffect(()=>{
     focusStation(null);if(!ready||!origin||!active)return;
     const controller=new AbortController();setNearbyState({key:originKey,status:'loading'});
@@ -33,6 +33,6 @@ export function TransitProvider({children}:{children:ReactNode}){
   const nearby=originKey&&nearbyState?.key===originKey?nearbyState:null;
   const stations=useMemo(()=>nearby?.data?.stations.filter(s=>s.kind==='bus'?showBus:showSubway)??[],[nearby,showBus,showSubway]);
   const routes=routeKey&&routeState?.key===routeKey?routeState:null;
-  return <Context.Provider value={{nearby,stations,showBus,showSubway,setShowBus,setShowSubway,retryNearby:()=>setAttempt(v=>v+1),focusStationId,focusStation,routes,queryRoutes,canRoute:Boolean(routeKey)}}>{children}</Context.Provider>;
+  return <Context.Provider value={{nearby,stations,showBus,showSubway,setShowBus,setShowSubway,retryNearby:()=>{if(origin)clearTransitNearby(origin,data.radius);setAttempt(v=>v+1);},focusStationId,focusStation,routes,queryRoutes,canRoute:Boolean(routeKey)}}>{children}</Context.Provider>;
 }
 export const useTransit=()=>useContext(Context);

@@ -4,6 +4,8 @@ import type {TransitDirection,TransitNearby,TransitRoutes} from './transit';
 import {OdsayError,parseOdsayBody,normalizeDirection,normalizeStations} from './odsay-data';
 import {cachedTransit,readTransitCache} from './transit-cache';
 import {cachedTmapRoutes,fetchTmapRoutes} from './tmap-client';
+import {fetchPublicNearby,clearPublicNearby} from './nearby-stations-client';
+export const clearTransitNearby=clearPublicNearby;
 export const routeProvider=process.env.NEXT_PUBLIC_TRANSIT_ROUTE_PROVIDER==='odsay'?'odsay':'tmap';
 export const transitMode=process.env.NEXT_PUBLIC_TRANSIT_MODE==='web'?'web':'server';
 async function webCall(endpoint:'pointSearch'|'searchPubTransPathT',params:Record<string,string>,signal:AbortSignal){return cachedTransit('web:'+endpoint+':'+new URLSearchParams(params),async()=>{
@@ -17,8 +19,9 @@ async function webCall(endpoint:'pointSearch'|'searchPubTransPathT',params:Recor
 async function serverResponse<T>(path:string,options:RequestInit):Promise<T>{const response=await fetch(path,options);const body=await response.json();if(!response.ok)throw new OdsayError(body.code??'UPSTREAM',response.status,body.error??'대중교통 조회에 실패했습니다.');return body;}
 const routeCacheKey=(origin:Coordinates,destination:Coordinates)=>'routes:'+transitMode+':'+JSON.stringify([origin.lat,origin.lng,destination.lat,destination.lng]);
 export const cachedTransitRoutes=(origin:Coordinates,destination:Coordinates)=>routeProvider==='tmap'?cachedTmapRoutes(origin,destination):readTransitCache<TransitRoutes>(routeCacheKey(origin,destination));
-export async function fetchTransitNearby(origin:Coordinates,radius:number,signal:AbortSignal):Promise<TransitNearby>{return cachedTransit('nearby:'+transitMode+':'+JSON.stringify([origin.lat,origin.lng,radius]),async()=>{
-  if(transitMode==='server')return serverResponse<TransitNearby>('/api/transit/nearby?'+new URLSearchParams({lat:String(origin.lat),lng:String(origin.lng),radius:String(radius)}),{signal:AbortSignal.timeout(15000)});
+export const fetchTransitNearby=fetchPublicNearby;
+export async function fetchOdsayNearby(origin:Coordinates,radius:number,signal:AbortSignal):Promise<TransitNearby>{return cachedTransit('nearby:'+transitMode+':'+JSON.stringify([origin.lat,origin.lng,radius]),async()=>{
+  if(transitMode==='server')return serverResponse<TransitNearby>('/api/transit/odsay-nearby?'+new URLSearchParams({lat:String(origin.lat),lng:String(origin.lng),radius:String(radius)}),{signal:AbortSignal.timeout(15000)});
   const {result,fetchedAt}=await webCall('pointSearch',{x:String(origin.lng),y:String(origin.lat),radius:String(radius),stationClass:'1:2'},new AbortController().signal);
   return {provider:'odsay',origin,radius,stations:normalizeStations(result,origin,radius),fetchedAt};
 },signal);}
