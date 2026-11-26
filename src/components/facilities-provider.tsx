@@ -2,7 +2,7 @@
 import {createContext,useContext,useEffect,useMemo,useRef,useState,type ReactNode} from 'react';
 import {usePathname} from 'next/navigation';
 import {useApp} from './app-provider';
-import {isFacilityCategory,type FacilityCategory,type FacilityPlace,type FacilityResponse} from '@/lib/facilities';
+import {isFacilityCategory,nearestFacilities,type FacilityCategory,type FacilityPlace,type FacilityResponse} from '@/lib/facilities';
 type CategoryState={status:'loading'|'success'|'error';response?:FacilityResponse;error?:string};
 type State={key:string;categories:Partial<Record<FacilityCategory,CategoryState>>};
 const Context=createContext<{categories:State['categories'];places:FacilityPlace[];loading:boolean;enabled:FacilityCategory[];available:boolean;retry:()=>void;focusId:string|null;focus:(id:string|null)=>void}>(null!);
@@ -33,7 +33,7 @@ export function FacilitiesProvider({children}:{children:ReactNode}){
   },[ready,available,active,key,lat,lng,data.radius,layerKey,attempt]);
   const enabled=useMemo(()=>layerKey.split(',').filter(isFacilityCategory),[layerKey]);
   const categories=useMemo(()=>available&&state.key===key?state.categories:{},[available,state,key]);
-  const places=useMemo(()=>enabled.flatMap(category=>categories[category]?.response?.places??[]),[enabled,categories]);
+  const places=useMemo(()=>lat===undefined||lng===undefined?[]:enabled.flatMap(category=>nearestFacilities({lat,lng},categories[category]?.response?.places??[],category,data.radius)),[enabled,categories,lat,lng,data.radius]);
   const retry=()=>{for(const category of enabled){if(categories[category]?.status==='error'||categories[category]?.response?.warning)cache.current.delete(`${key}|${category}`);}setAttempt(v=>v+1);};
   return <Context.Provider value={{categories,places,loading:available&&enabled.some(c=>!categories[c]||categories[c]?.status==='loading'),enabled,available,retry,focusId,focus}}>{children}</Context.Provider>;
 }

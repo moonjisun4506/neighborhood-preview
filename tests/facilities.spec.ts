@@ -33,7 +33,7 @@ test('real facility markers, individual filters, popup, radius and fixed address
   await page.setViewportSize({width:1440,height:1000});const responsePromise=page.waitForResponse(r=>r.url().includes('/api/facilities?'),{timeout:30000});
   await page.goto('/explore',{waitUntil:'domcontentloaded'});const response:FacilityResponse=await (await responsePromise).json();expect(response.places.length).toBeGreaterThan(0);
   const canvas=page.getByTestId('map-canvas');await expect(canvas).toHaveAttribute('data-map-ready','true',{timeout:30000});
-  const markers=page.locator('.facility-map-marker');const represented=()=>markers.evaluateAll(nodes=>nodes.reduce((sum,node)=>sum+Number((node as HTMLElement).dataset.count),0));await expect.poll(represented).toBe(response.places.length);
+  const markers=page.locator('.facility-map-marker');const represented=()=>markers.evaluateAll(nodes=>nodes.reduce((sum,node)=>sum+Number((node as HTMLElement).dataset.count),0));await expect.poll(represented).toBe(Math.min(2,response.places.length));
   expect(await markers.evaluateAll(nodes=>nodes.every(node=>(node as HTMLElement).dataset.category==='cafe'))).toBe(true);
   const topMarker=markers.last();const placeId=await topMarker.getAttribute('data-place-id');const place=response.places.find(p=>p.id===placeId)!;
   await topMarker.click();await expect(page.getByRole('dialog',{name:'시설 상세 정보'})).toContainText(place.name);await expect(page.getByRole('dialog',{name:'시설 상세 정보'})).toContainText(place.address);await expect(page.getByRole('dialog',{name:'시설 상세 정보'})).toContainText(`직선거리 약 ${Math.round(place.distanceMeters)}m`);
@@ -42,9 +42,9 @@ test('real facility markers, individual filters, popup, radius and fixed address
   await page.mouse.move(bounds.x+80,bounds.y+180);await page.mouse.down();await page.mouse.move(bounds.x+180,bounds.y+240,{steps:8});await page.mouse.up();
   await expect.poll(()=>page.getByTestId('map-center').innerText()).not.toBe(beforeCenter);expect(calls.length).toBe(beforeCalls);await expect(page.getByTestId('facility-origin')).toHaveAttribute('data-origin-lng',String(origin.lng));
   await page.getByRole('checkbox',{name:'일반 카페',exact:true}).uncheck();await expect(markers).toHaveCount(0);await expect(canvas).toHaveAttribute('data-marker-lat',/.+/);
-  await page.getByRole('checkbox',{name:'일반 카페',exact:true}).check();await expect.poll(represented).toBe(response.places.length);expect(calls.length).toBe(beforeCalls);
+  await page.getByRole('checkbox',{name:'일반 카페',exact:true}).check();await expect.poll(represented).toBe(Math.min(2,response.places.length));expect(calls.length).toBe(beforeCalls);
   const nearResponse=page.waitForResponse(r=>r.url().includes('/api/facilities?')&&new URL(r.url()).searchParams.get('radius')==='300');await page.getByRole('button',{name:'300m',exact:true}).click();
-  const nearby:FacilityResponse=await (await nearResponse).json();await expect.poll(represented).toBe(nearby.places.length);expect(await markers.evaluateAll(nodes=>nodes.every(n=>Number((n as HTMLElement).dataset.distance)<=300))).toBe(true);
+  const nearby:FacilityResponse=await (await nearResponse).json();await expect.poll(represented).toBe(Math.min(2,nearby.places.length));expect(await markers.evaluateAll(nodes=>nodes.every(n=>Number((n as HTMLElement).dataset.distance)<=300))).toBe(true);
   expect(calls.every(url=>new URL(url).searchParams.get('lat')===String(origin.lat)&&new URL(url).searchParams.get('lng')===String(origin.lng))).toBe(true);
   await page.getByRole('checkbox',{name:'편의점',exact:true}).check();await expect.poll(()=>page.locator('.facility-map-marker[data-category="convenience"]').count()).toBeGreaterThan(0);
   await page.screenshot({path:'test-results/facilities-live-desktop.png',fullPage:true});
