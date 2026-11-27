@@ -1,5 +1,7 @@
 # 주변 버스정류장 수정 (2026-11-27)
 
+추가 배포 검증: 아래 초기 로컬 수정 이후 `a1ce061`을 GitHub main에 Push하고 Vercel 자동 배포 완료를 확인했다. 실제 `https://neighborhood-preview-kzcj.vercel.app`에서 서울 3곳의 공식 파일 기반 조회·마커·버스 ON/OFF·TMAP 도보·재클릭 캐시가 통과했다. `tests/production-bus-stops.spec.ts`와 `test-results/production-bus-final`이 배포 검증 근거다. 키를 출력하지 않았고 위치 파일 방식은 그대로 유지했다.
+
 ## 원인과 실제 조사
 
 - 기존 배포 주소 `https://neighborhood-preview-kzcj.vercel.app`의 주변 조회 API는 서울 세 주소 모두 버스 `config_error`와 0건을 반환했다. 원인은 서버 `SEOUL_BUS_API_KEY` 미설정이다. 지하철은 정상 조회됐다. 로컬에서는 해당 키가 있었으므로 배포와 상태가 달랐다.
