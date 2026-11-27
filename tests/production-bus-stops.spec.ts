@@ -8,6 +8,8 @@ test.skip(!production,'Set PRODUCTION_URL to verify the deployed site.');
 test('PRODUCTION real bus lookup, markers, filters and walking at three Seoul addresses',async({page},info)=>{
  test.setTimeout(180000);const observations=[];let walks=0,transit=0,walkingBlocked='';
  page.on('request',r=>{if(r.url().includes('/api/tmap/walk'))walks++;if(r.url().includes('/api/tmap/transit'))transit++;});
+ // Server-cache lookup disabled so each click is observed as one walking request.
+ await page.route('**/api/walking/cached',r=>r.fulfill({json:{results:[]}}));
  await page.goto(production!+'/');
  for(const [index,q]of ['서울 중구 세종대로 110','서울 마포구 와우산로 94','서울 송파구 올림픽로 300'].entries()){
   await page.setViewportSize({width:index===1?390:1440,height:1000});await page.getByLabel('관심 있는 집 주소, 건물명 또는 지역').fill(q);const searching=page.waitForResponse(r=>r.url().includes('/api/locations/search?'));await page.getByRole('button',{name:'주소 검색',exact:true}).click();const search=await searching;expect(search.ok()).toBe(true);const address=(await search.json()).results[0],origin=address.coordinates;
