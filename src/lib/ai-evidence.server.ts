@@ -8,12 +8,14 @@ import type {SummaryRequest,Evidence,SectionKey} from './ai-summary';
 import {safetyData} from './safety.server';
 import {safetyEvidenceText,safetyEvidenceSource} from './safety';
 import {nearbyNoise} from './noise.server';
-import {addressEvidence} from './address-evidence.server';
+import {practicalEvidence} from './practical-evidence.server';
 import {peekTmapRoutes} from './tmap.server';
 import {nearbyStations} from './nearby-stations.server';
 import {nearbyKindFact} from './nearby-stations';
 export function validateSummaryRequest(value:unknown):value is SummaryRequest{
   if(!value||typeof value!=='object')return false;const v=value as SummaryRequest;
+  const calculation=v.monthlyCalculation;
+  if(calculation!==undefined&&(!calculation||typeof calculation!=='object'||!['addressId','destinationId','outboundId','inboundId'].every(k=>typeof (calculation as Record<string,unknown>)[k]==='string'&&String((calculation as Record<string,unknown>)[k]).length<=200)||!Number.isInteger(calculation.days)||calculation.days!==v.days))return false;
   return Array.isArray(v.addresses)&&v.addresses.length>=1&&v.addresses.length<=3&&new Set(v.addresses.map(a=>a?.id)).size===v.addresses.length&&v.addresses.every(a=>validAddress(a)&&a.source==='kakao'&&validCoordinates(a.coordinates))&&[300,500,1000].includes(v.radius)&&(v.destination===null||(validAddress(v.destination)&&v.destination.source==='kakao'&&validCoordinates(v.destination.coordinates)))&&Number.isInteger(v.days)&&v.days>=0&&v.days<=31&&typeof v.roundTrip==='boolean'&&rentMonths().includes(v.month)&&Object.hasOwn(housingTypes,v.type)&&Number.isSafeInteger(v.min)&&v.min>=0&&(v.max===null||(Number.isSafeInteger(v.max)&&v.max>=v.min))&&Array.isArray(v.transit)&&v.transit.length<=3;
 }
 function same(a:unknown,b:{lat:number;lng:number}){return validCoordinates(a)&&Math.abs(a.lat-b.lat)<1e-7&&Math.abs(a.lng-b.lng)<1e-7;}
@@ -55,7 +57,7 @@ export async function collectEvidence(input:SummaryRequest){
     const submitted=input.transit.find(t=>t?.addressId===address.id),nearby=submitted?.nearby?.provider==='public'&&same(submitted.nearby.origin,address.coordinates!)&&submitted.nearby.radius===input.radius?await nearbyStations(address.coordinates!,input.radius):cleanNearby(submitted?.nearby??null,address.coordinates!,input.radius),routes=submitted?.routes?.provider==='tmap'&&input.destination?.coordinates?await peekTmapRoutes(address.coordinates!,input.destination.coordinates).catch(()=>null):cleanRoutes(submitted?.routes??null,address.coordinates!,input.destination);if(routes?.provider==='tmap'&&routes.expiresAt)tmapExpiry.push(routes.expiresAt);
     if(nearby)for(const kind of ['bus','subway'] as const){const fact=nearbyKindFact(nearby,kind);add('transit',prefix+fact.text,fact.source);}else add('transit',`${prefix}주변 버스정류장·지하철역 정보 없음. 조회 실패·미조회 또는 오래된 자료이므로 추가 확인이 필요합니다.`,'교통 자료 미확인');
     const fastest=(paths:TransitRoutes['outbound']['paths'])=>[...paths].filter(p=>p.minutes!==null).sort((a,b)=>a.minutes!-b.minutes!)[0],out=fastest(routes?.outbound.paths??[]),back=fastest(routes?.inbound.paths??[]);
-    if(out){add('transit',`${prefix}등록 목적지 ${input.destination!.address}까지 제공된 가는 편 경로 중 최단 ${out.minutes}분입니다. 실제 운행·대기 시간은 달라질 수 있습니다.`,`${routes?.provider==='tmap'?'TMAP':'ODsay'} 경로 응답·조회 자료`);const cost=monthlyTransportCost(out.fare,back?.fare??null,input.days,input.roundTrip);add('transit',`${prefix}월 ${input.days}일 ${input.roundTrip?'왕복':'편도'} 예상 교통비: ${cost===null?'정보 없음 · 필요한 실제 요금이 제공되지 않았습니다':cost.toLocaleString('ko-KR')+'원(제공된 요금 기준)'}.`,`${routes?.provider==='tmap'?'TMAP':'ODsay'} 실제 요금·입력 일수 계산`);}
+    if(out){add('transit',`${prefix}등록 목적지 ${input.destination!.address}까지 제공된 가는 편 경로 중 최단 ${out.minutes}분입니다. 실제 운행·대기 시간은 달라질 수 있습니다.`,`${routes?.provider==='tmap'?'TMAP':'ODsay'} 경로 응답·조회 자료`);const cost=input.monthlyCalculation?.addressId===address.id&&input.monthlyCalculation.destinationId===input.destination?.id&&input.monthlyCalculation.days===input.days&&input.monthlyCalculation.outboundId===out.id&&input.monthlyCalculation.inboundId===back?.id?monthlyTransportCost(out.fare,back?.fare??null,input.days,input.roundTrip):null;add('transit',`${prefix}월 ${input.days}일 ${input.roundTrip?'왕복':'편도'} 예상 교통비: ${cost===null?'정보 없음 · 필요한 실제 요금이 제공되지 않았습니다':cost.toLocaleString('ko-KR')+'원(제공된 요금 기준)'}.`,`${routes?.provider==='tmap'?'TMAP':'ODsay'} 실제 요금·입력 일수 계산`);}
     else add('transit',`${prefix}학교·직장 이동 시간과 교통비는 정보 없음. 등록 목적지와 실제 경로·요금 조회를 추가로 확인해 주세요.`,'경로·요금 자료 미확인');
     if(data.rent){const r=data.rent,s=r.statistics;add('rent',`${prefix}${r.region.name}의 ${r.month.slice(0,4)}년 ${r.month.slice(4)}월 ${housingTypes[r.type]} 월세 거래 ${s.count}건. 월세 중앙값 ${s.medianRent===null?'정보 없음':s.medianRent.toLocaleString('ko-KR')+'만원'}, 보증금 중앙값 ${s.medianDeposit===null?'정보 없음':s.medianDeposit.toLocaleString('ko-KR')+'만원'}. ${s.smallSample?'표본 부족(5건 미만). ':''}보증금 ${input.min}만원 이상${input.max===null?'(상한 없음)':`, ${input.max}만원 이하`} 조건의 지역 참고 통계이며 개별 집 월세가 아닙니다.`,'국토교통부 실제 월세 통계');}
     else add('rent',`${prefix}지역 월세 정보 없음. 실거래 조회 자료가 없어 월세·보증금·거래 건수를 추정하지 않습니다.`,'월세 자료 미확인');
@@ -63,12 +65,21 @@ export async function collectEvidence(input:SummaryRequest){
     if(missing)add('checks',`${prefix}생활시설 ${missing}개 종류의 조회에 실패했습니다. 미조회 항목은 다시 확인해 주세요.`,'조회 상태');
     let noisePoint:import('./noise').NoisePoint|undefined,noiseResult:import('./noise').NoiseResult|undefined;
     try{const noise=await nearbyNoise(address.coordinates!);noiseResult=noise;noisePoint=noise.points[0];for(const point of noise.points.slice(0,2))add('checks',`${prefix}반경 1km 이내 공식 소음 측정 지점 ${point.name}(선택 주소에서 직선 약 ${Math.round(point.distanceMeters)}m)의 ${point.measuredPeriod} 자료: ${point.metrics.map(m=>`${m.label} ${m.db} dB(A)`).join(', ')}. 출처: ${point.source} (${point.sourceUrl}). 측정 지점의 과거 참고값으로, 이 집의 실제 소음·위험 등급이 아닙니다.`,'국가소음정보시스템 공식 측정자료');}catch{/* Missing or failed noise observations never become inferred noise values. */}
-    if(input.addresses.length===1)for(const fact of addressEvidence(input,address,data.facilities,data.rent,nearby,routes,noisePoint,noiseResult))add(fact.section,fact.text,fact.source);
-    try{const {result}=await safetyData(address.coordinates!),text=safetyEvidenceText(result);if(text)add('checks',prefix+text,(input.addresses.length===1?'주소 카드 · ':'')+safetyEvidenceSource);}catch{/* Only successfully received official imagery is evidence. */}
+    if(input.addresses.length===1)for(const fact of await practicalEvidence(input,address,data.facilities,nearby,routes,noiseResult,data.rent)){add(fact.section,fact.text,fact.source);if(fact.expiresAt)evidence[evidence.length-1].expiresAt=fact.expiresAt;}
+    let safetyConfirmed=false;
+    try{
+      const {result}=await safetyData(address.coordinates!),text=safetyEvidenceText(result);
+      if(text){
+        safetyConfirmed=true;
+        if(input.addresses.length===1)add('safety',`선택 주소 반경 1km 기준으로 생활안전지도 공식 범죄주의구간 참고 지도를 확인할 수 있습니다(${result.catalog.period}). 개별 사건 위치나 집의 안전·위험을 뜻하지 않으며 이미지 색상으로 구간 유무·위험도를 판독하지 않았습니다.`,'주소 카드 · '+safetyEvidenceSource+' · '+result.sourceUrl);
+        else add('checks',prefix+text,safetyEvidenceSource);
+      }
+    }catch{/* Unavailable imagery cannot support a safety claim. */}
+    if(input.addresses.length===1&&!safetyConfirmed)add('safety','현재 확인 가능한 주변 치안 자료가 없습니다.','주소 카드 · 치안 미확인');
   }
   if(input.addresses.length>1){add('overview','선택한 주소들의 같은 조건에서 조회된 시설·교통·월세 정보를 비교했습니다. 주소의 순위나 거주 적합성은 판단하지 않습니다.','공통 비교 조건');
     for(let c=0;c<facilityCategories.length;c++){if(all.every(d=>d.facilities[c].data))add('facilities',`${facilityCategories[c][1]}의 같은 반경 내 조회 건수는 ${input.addresses.map((a,i)=>`${a.address} ${all[i].facilities[c].data!.places.length}곳`).join(', ')}입니다. 검색에 반환된 건수 차이이며 지역의 우열을 의미하지 않습니다.`,'카카오 동일 조건 비교');}}
   add('checks','시설 종류나 개수만으로 소음·범죄·치안·안전 수준을 판단할 수 없습니다. 소음·채광·관리 상태·보행 동선은 현장에서 직접 확인해 주세요.','계약 전 확인 안내 · 실제 환경 판정 아님');
   add('checks','시설 운영시간, 실제 통학 시간대의 배차·환승, 관리비·보증금·계약 조건은 운영기관·중개인·계약서에서 추가 확인해 주세요.','계약 전 확인 안내');
-  return evidence.map(e=>e.source.includes('TMAP')&&tmapExpiry.length?{...e,expiresAt:tmapExpiry.sort()[0]}:e);
+  return evidence.map(e=>!e.expiresAt&&e.source.includes('TMAP')&&tmapExpiry.length?{...e,expiresAt:tmapExpiry.sort()[0]}:e);
 }
