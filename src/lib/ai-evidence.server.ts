@@ -61,9 +61,9 @@ export async function collectEvidence(input:SummaryRequest){
     else add('rent',`${prefix}지역 월세 정보 없음. 실거래 조회 자료가 없어 월세·보증금·거래 건수를 추정하지 않습니다.`,'월세 자료 미확인');
     if(!available.length)add('benefits',`${prefix}생활 편의성을 설명할 시설 근거가 부족합니다. 추가 조회와 현장 확인이 필요합니다.`,'근거 부족 안내');
     if(missing)add('checks',`${prefix}생활시설 ${missing}개 종류의 조회에 실패했습니다. 미조회 항목은 다시 확인해 주세요.`,'조회 상태');
-    let noisePoint:import('./noise').NoisePoint|undefined;
-    try{const noise=await nearbyNoise(address.coordinates!,input.radius);noisePoint=noise.points[0];for(const point of noise.points.slice(0,2))add('checks',`${prefix}공식 소음 측정 지점 ${point.name}(선택 주소에서 직선 약 ${Math.round(point.distanceMeters)}m)의 ${point.measuredPeriod} 자료: ${point.metrics.map(m=>`${m.label} ${m.db} dB`).join(', ')}. 출처: ${point.source} (${point.sourceUrl}). 측정 지점의 과거 참고값으로, 이 집의 실제 소음·위험 등급이 아닙니다.`,'국가소음정보시스템 공식 측정자료');}catch{/* Missing or failed noise observations never become inferred noise values. */}
-    if(input.addresses.length===1)for(const fact of addressEvidence(input,address,data.facilities,data.rent,nearby,routes,noisePoint))add(fact.section,fact.text,fact.source);
+    let noisePoint:import('./noise').NoisePoint|undefined,noiseResult:import('./noise').NoiseResult|undefined;
+    try{const noise=await nearbyNoise(address.coordinates!);noiseResult=noise;noisePoint=noise.points[0];for(const point of noise.points.slice(0,2))add('checks',`${prefix}반경 1km 이내 공식 소음 측정 지점 ${point.name}(선택 주소에서 직선 약 ${Math.round(point.distanceMeters)}m)의 ${point.measuredPeriod} 자료: ${point.metrics.map(m=>`${m.label} ${m.db} dB(A)`).join(', ')}. 출처: ${point.source} (${point.sourceUrl}). 측정 지점의 과거 참고값으로, 이 집의 실제 소음·위험 등급이 아닙니다.`,'국가소음정보시스템 공식 측정자료');}catch{/* Missing or failed noise observations never become inferred noise values. */}
+    if(input.addresses.length===1)for(const fact of addressEvidence(input,address,data.facilities,data.rent,nearby,routes,noisePoint,noiseResult))add(fact.section,fact.text,fact.source);
     try{const {result}=await safetyData(address.coordinates!),text=safetyEvidenceText(result);if(text)add('checks',prefix+text,(input.addresses.length===1?'주소 카드 · ':'')+safetyEvidenceSource);}catch{/* Only successfully received official imagery is evidence. */}
   }
   if(input.addresses.length>1){add('overview','선택한 주소들의 같은 조건에서 조회된 시설·교통·월세 정보를 비교했습니다. 주소의 순위나 거주 적합성은 판단하지 않습니다.','공통 비교 조건');

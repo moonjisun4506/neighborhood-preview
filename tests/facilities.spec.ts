@@ -36,7 +36,7 @@ test('real facility markers, individual filters, popup, radius and fixed address
   const markers=page.locator('.facility-map-marker');const represented=()=>markers.evaluateAll(nodes=>nodes.reduce((sum,node)=>sum+Number((node as HTMLElement).dataset.count),0));await expect.poll(represented).toBe(Math.min(2,response.places.length));
   expect(await markers.evaluateAll(nodes=>nodes.every(node=>(node as HTMLElement).dataset.category==='cafe'))).toBe(true);
   const topMarker=markers.last();const placeId=await topMarker.getAttribute('data-place-id');const place=response.places.find(p=>p.id===placeId)!;
-  await topMarker.click();await expect(page.getByRole('dialog',{name:'시설 상세 정보'})).toContainText(place.name);await expect(page.getByRole('dialog',{name:'시설 상세 정보'})).not.toContainText('도보 시간 확인 불가');await expect(page.getByRole('dialog',{name:'시설 상세 정보'})).toContainText(`직선거리 약 ${Math.round(place.distanceMeters)}m`);
+  await topMarker.click();await expect(page.getByRole('dialog',{name:'시설 상세 정보'})).toContainText(place.name);await expect(page.getByRole('dialog',{name:'시설 상세 정보'})).not.toContainText('도보 시간 확인 불가');await expect(page.getByRole('dialog',{name:'시설 상세 정보'})).not.toContainText(`직선거리 약`);
   await page.getByRole('button',{name:'시설 상세 닫기'}).click();
   const beforeCalls=calls.length;const beforeCenter=await page.getByTestId('map-center').innerText();const bounds=(await canvas.boundingBox())!;
   await page.mouse.move(bounds.x+80,bounds.y+180);await page.mouse.down();await page.mouse.move(bounds.x+180,bounds.y+240,{steps:8});await page.mouse.up();

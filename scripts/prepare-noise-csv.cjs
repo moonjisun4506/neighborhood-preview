@@ -1,0 +1,12 @@
+const fs=require('node:fs/promises');
+// RFC 4180 quoted fields, doubled quotes, CRLF and embedded newlines.
+function csv(text){const rows=[];let row=[],field='',quoted=false;for(let i=0;i<text.length;i++){const c=text[i];if(c==='"'){if(quoted&&text[i+1]==='"'){field+='"';i++;}else quoted=!quoted;}else if(c===','&&!quoted){row.push(field);field='';}else if((c==='\n'||c==='\r')&&!quoted){if(c==='\r'&&text[i+1]==='\n')i++;row.push(field);if(row.some(Boolean))rows.push(row);row=[];field='';}else field+=c;}if(quoted)throw Error('Unclosed CSV field');if(field||row.length){row.push(field);rows.push(row);}return rows;}
+async function main(){const meta=JSON.parse(await fs.readFile('data/noise/csv-provenance.json','utf8')),rows=csv(new TextDecoder(meta.encoding,{fatal:true}).decode(await fs.readFile('data/noise/environment-2025.csv'))),headers=rows.shift();const raw=rows.map(row=>Object.fromEntries(headers.map((h,i)=>[h,row[i]])));
+ const response=await fetch('https://www.noiseinfo.or.kr/api/noise/getSpot.dojson?noiseType=EM&mangCode=&localCode=');if(!response.ok)throw Error('Official positions unavailable');const spots=(await response.json()).output;
+ const normalize=s=>String(s??'').replace(/\s+/g,'');let unmatched=0,matched=0;const records=[];
+ for(const r of raw){const candidates=spots.filter(s=>normalize(s.spotName)===normalize(r['측정지점'])&&normalize(s.localName)===normalize(r['도시']));if(candidates.length!==1){unmatched++;continue;}const s=candidates[0];if(!Number.isFinite(s.wgs84Lat)||!Number.isFinite(s.wgs84Lon)){unmatched++;continue;}matched++;records.push({spotCode:s.spotCode,name:r['측정지점'],address:s.divName,coordinates:{lat:s.wgs84Lat,lng:s.wgs84Lon},year:r['측정연도'],quarter:r['분기'],day:r['주간평균'],night:r['야간평균']});}
+ const latest=new Map();for(const r of records){const key=r.spotCode,old=latest.get(key);if(!old||r.year+r.quarter>old.year+old.quarter)latest.set(key,r);}
+ const data={...meta,coordinateSource:'https://www.noiseinfo.or.kr/api/noise/getSpot.dojson?noiseType=EM',coordinateCheckedAt:new Date().toISOString(),rawRows:raw.length,matchedRows:matched,unmatchedRows:unmatched,records:[...latest.values()]};
+ await fs.mkdir('src/data',{recursive:true});await fs.writeFile('src/data/noise-csv-2025.json',JSON.stringify(data));console.log(JSON.stringify({rawRows:raw.length,matchedRows:matched,unmatchedRows:unmatched,latestStations:data.records.length,headers}));
+}
+if(require.main===module)main().catch(()=>{console.error('CSV preparation failed; no invented coordinates.');process.exitCode=1;});module.exports={csv};

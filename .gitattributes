@@ -1,0 +1,2 @@
+# Preserve downloaded CSV bytes, encoding and checksum on every platform.
+data/noise/*.csv -text

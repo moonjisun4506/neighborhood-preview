@@ -1,0 +1,10 @@
+const {loadEnvConfig}=require('@next/env');const fs=require('node:fs/promises');
+loadEnvConfig(process.cwd(),false,{info(){},error(){}});
+async function main(){
+ let key=process.env.MOLIT_API_KEY?.trim();if(!key){console.log('MOLIT_API_KEY: missing');return;}console.log('MOLIT_API_KEY: configured');try{if(/%[0-9a-f]{2}/i.test(key))key=decodeURIComponent(key);}catch{throw Error('key encoding');}
+ const jobs=[['rail','https://apis.data.go.kr/B552584/rnmsManualDataService/getRnmsInfo',{serviceKey:key,pageNo:'1',numOfRows:'1000',returnType:'json'}],['eia-attributes','https://apis.data.go.kr/1480523/NoiseVibrationService/getInfo',{ServiceKey:key,mgtNo:'JJ2005E006',type:'json'}],['eia-wfs','https://apis.data.go.kr/1480523/NoiseVibrationService/getInfoWFS',{ServiceKey:key,srsName:'EPSG:4326',bbox:'126.96,37.55,127.00,37.59',maxFeatures:'20',resultType:'results'}]];
+ await fs.mkdir('test-results/noise-public',{recursive:true});
+ for(const [name,endpoint,params] of jobs){try{const r=await fetch(endpoint+'?'+new URLSearchParams(params),{signal:AbortSignal.timeout(25000)}),raw=await r.text();const sanitized=raw.split(key).join('[REDACTED]').split(encodeURIComponent(key)).join('[REDACTED]');await fs.writeFile('test-results/noise-public/'+name+'-response.txt',sanitized);console.log(JSON.stringify({name,http:r.status,contentType:r.headers.get('content-type'),bytes:raw.length,preview:sanitized.slice(0,1900)}));}catch{console.log(JSON.stringify({name,status:'network_error'}));}}
+ const meta=await fetch('https://www.data.go.kr/tcs/dss/selectFileDataDownload.do',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({publicDataPk:'15065396',publicDataDetailPk:'uddi:d67ba7fd-e142-4224-8af5-d55d9861d53c',atchFileId:'',fileDetailSn:'1',publicDataTyCode:'PR0051'})});const raw=await meta.text();await fs.writeFile('test-results/noise-public/csv-download-metadata.json',raw);console.log('CSV metadata: '+raw.slice(0,2500));
+}
+main().catch(()=>{console.error('Noise probe failed; credential values withheld.');process.exitCode=1;});

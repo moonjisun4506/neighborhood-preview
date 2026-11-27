@@ -2,10 +2,10 @@ import type {AddressRecord} from './demo-data';
 import {nearestFacilities,type FacilityResponse} from './facilities';
 import {monthlyTransportCost,type TransitNearby,type TransitRoutes} from './transit';
 import {housingTypes,type RentResult} from './rent';
-import type {NoisePoint} from './noise';
+import {noiseReferenceText,noisePointsWithinRadius,type NoisePoint,type NoiseResult} from './noise';
 import type {Evidence,SectionKey,SummaryRequest} from './ai-summary';
 import {nearbyKindFact} from './nearby-stations';
-export function addressEvidence(input:SummaryRequest,address:AddressRecord,facilities:{label:string;data?:FacilityResponse}[],rent:RentResult|undefined,nearby:TransitNearby|null,routes:TransitRoutes|null,noisePoint:NoisePoint|undefined):Omit<Evidence,'id'>[]{
+export function addressEvidence(input:SummaryRequest,address:AddressRecord,facilities:{label:string;data?:FacilityResponse}[],rent:RentResult|undefined,nearby:TransitNearby|null,routes:TransitRoutes|null,noisePoint:NoisePoint|undefined,noiseResult?:NoiseResult):Omit<Evidence,'id'>[]{
   const facts:Omit<Evidence,'id'>[]=[];const add=(section:SectionKey,text:string,source:string)=>facts.push({section,text,source:'주소 카드 · '+source});
   const groups=facilities.map(f=>({...f,nearest:f.data?nearestFacilities(address.coordinates!,f.data.places,f.data.category,input.radius):[]}));
   const available=groups.filter(f=>f.nearest.length);
@@ -29,6 +29,8 @@ export function addressEvidence(input:SummaryRequest,address:AddressRecord,facil
   else add('rent','주거비 참고 자료는 미확인입니다. 조회된 실거래 자료가 없어 월세·보증금·거래 건수를 추정하지 않습니다.','월세 자료 미확인');
   add('checks','시설 운영시간·출입구·실제 보행 동선, 채광·관리 상태·관리비·계약 조건은 현장과 계약서에서 확인해 주세요.','계약 전 추가 확인');
   add('checks','이 자료만으로 집의 실제 소음이나 치안 수준을 판단할 수 없습니다. 생활 시간대에 직접 방문해 확인해 주세요.','미확인 환경 안내');
-  if(noisePoint)add('checks',`${noisePoint.source}의 ${noisePoint.name}(선택 집에서 직선 약 ${Math.round(noisePoint.distanceMeters)}m), ${noisePoint.measuredPeriod}: ${noisePoint.metrics.map(m=>m.label+' '+m.db+' dB').join(', ')}. 출처: ${noisePoint.sourceUrl}. 측정 지점의 참고값이며 집 자체의 소음이 아닙니다.`,'공식 소음 측정자료');
+  noisePoint=noisePoint&&address.coordinates?noisePointsWithinRadius(address.coordinates,[noisePoint])[0]:undefined;
+  if(noisePoint)add('checks',`선택 주소 반경 1km 이내 ${noisePoint.source}의 ${noisePoint.name}(선택 집에서 직선 약 ${Math.round(noisePoint.distanceMeters)}m), ${noisePoint.measuredPeriod}: ${noisePoint.metrics.map(m=>m.label+' '+m.db+' dB(A)').join(', ')}. 출처: ${noisePoint.sourceUrl}. 측정 지점의 참고값이며 집 자체의 소음이 아닙니다.`,'공식 소음 측정자료');
+  if(!noisePoint){const reference=noiseResult?.references?.[0];add('checks',reference?noiseReferenceText(reference):'공식 소음 수치는 미확인입니다. 소음지도 예측값도 조회하지 않았습니다. 출퇴근·야간에 방문해 창문 방향과 방음 상태, 큰 도로·지상 철도의 유무를 직접 확인해 주세요.','소음 미확인·현장 확인 안내');}
   return facts;
 }
