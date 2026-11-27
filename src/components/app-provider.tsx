@@ -1,5 +1,6 @@
 'use client';
-import {createContext,useContext,useEffect,useState,type ReactNode} from 'react';
+import {createContext,useContext,useEffect,useRef,useState,type ReactNode} from 'react';
+import {accountLeaving,useAuth} from './auth-provider';
 import type {AiSummary} from '@/lib/ai-summary';
 import {useSavedDatabase,cloudIdsKey} from './saved-database';
 import {demoAddresses,legacyAddresses,facilityCategories,type AddressRecord,type Coordinates} from '@/lib/demo-data';
@@ -12,7 +13,7 @@ export type Data = {
   legacyPreferences?: Record<string,unknown>;
 };
 const initial:Data={aiSummaries:{},addresses:demoAddresses,selectedId:null,saved:[],compare:[],notes:{},search:'',destination:'',destinationType:'school',radius:500,layers:facilityCategories.map(c=>c[0]),mapCenter:null,facilityLayerVersion:1,destinationLocation:null,commuteDays:20,commuteRoundTrip:true};
-const Context=createContext<{data:Data;ready:boolean;update:(patch:Partial<Data>)=>void;notify:(s:string)=>void;toggleSaved:(id:string)=>void;toggleCompare:(id:string)=>void;selectAddress:(id:string)=>void;chooseAddress:(address:AddressRecord)=>void;addManualAddress:(query:string)=>string;selected:AddressRecord|undefined;storageStatus:string;storageError:string;storageBusy:boolean;cloudIds:string[];retryStorage:()=>Promise<void>;saveAddress:(id:string)=>Promise<boolean>;saveMemo:(id:string,memo:string)=>Promise<boolean>}>(null!);
+const Context=createContext<{data:Data;ready:boolean;update:(patch:Partial<Data>)=>void;notify:(s:string)=>void;toggleSaved:(id:string)=>void;toggleCompare:(id:string)=>void;selectAddress:(id:string)=>void;chooseAddress:(address:AddressRecord)=>void;addManualAddress:(query:string)=>string;selected:AddressRecord|undefined;storageAccount:string|null;storageStatus:string;storageError:string;storageBusy:boolean;cloudIds:string[];retryStorage:()=>Promise<void>;saveAddress:(id:string)=>Promise<boolean>;saveMemo:(id:string,memo:string)=>Promise<boolean>}>(null!);
 function isAddress(v:unknown):v is AddressRecord {
   if(!v||typeof v!=='object')return false;
   const a=v as AddressRecord;
@@ -44,10 +45,27 @@ export function AppProvider({children}:{children:ReactNode}){
       }
     }catch{}try{const ids:string[]=JSON.parse(localStorage.getItem(cloudIdsKey)??'[]');setData(d=>({...d,saved:d.saved.filter(id=>!ids.includes(id)),compare:d.compare,notes:Object.fromEntries(Object.entries(d.notes).filter(([id])=>!ids.includes(id)))}));}catch{}setReady(true);
   },[]);
-  useEffect(()=>{if(ready)try{localStorage.setItem('neighborhood-preview-v2',JSON.stringify({...data,aiSummaries:{}}));}catch{}},[data,ready]);
+  const {auth,sessionExpired}=useAuth();
+  const database=useSavedDatabase(data,setData,ready,setMessage,sessionExpired);
+  // Signed in: account memos live in the DB only, so they are not written to this browser's storage.
+  const accountIds=database.storageAccount?database.cloudIds:null;
+  useEffect(()=>{if(ready&&!accountLeaving())try{localStorage.setItem('neighborhood-preview-v2',JSON.stringify({...data,aiSummaries:{},notes:accountIds?Object.fromEntries(Object.entries(data.notes).filter(([id])=>!accountIds.includes(id))):data.notes}));}catch{}},[data,ready,accountIds]);
+  // Account settings (destination, commute days, comparison, radius) follow the user across devices.
+  const settingsLoaded=useRef(false);const settings=JSON.stringify({destinationLocation:data.destinationLocation,commuteDays:data.commuteDays,commuteRoundTrip:data.commuteRoundTrip,compare:data.compare,radius:data.radius});
+  const putSettings=(body:string)=>fetch('/api/account/settings',{method:'PUT',headers:{'Content-Type':'application/json'},body:'{"settings":'+body+'}'}).then(r=>{if(r.status===401)return r.json().then(b=>{if(b.code==='SESSION_EXPIRED')sessionExpired();});}).catch(()=>{});
+  useEffect(()=>{
+    if(auth.status!=='user'||!database.storageAccount||database.storageStatus!=='ready'||settingsLoaded.current)return;
+    fetch('/api/account/settings',{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject(r)).then(body=>{
+      const remote=body.settings?.settings;
+      if(remote)setData(d=>({...d,destinationLocation:remote.destinationLocation??null,commuteDays:remote.commuteDays,commuteRoundTrip:remote.commuteRoundTrip,radius:remote.radius,compare:(remote.compare as string[]).filter(id=>d.saved.includes(id)).slice(0,3)}));
+      else void putSettings(settings);
+      settingsLoaded.current=true;
+    }).catch(()=>{});
+  },[auth.status,database.storageAccount,database.storageStatus]);
+  useEffect(()=>{if(!settingsLoaded.current||auth.status!=='user')return;const timer=setTimeout(()=>{void putSettings(settings);},700);return()=>clearTimeout(timer);
+  },[settings,auth.status]);
   useEffect(()=>{if(message){const t=setTimeout(()=>setMessage(''),3500);return()=>clearTimeout(t);}},[message]);
   const update=(patch:Partial<Data>)=>setData(d=>({...d,...patch}));
-  const database=useSavedDatabase(data,setData,ready,setMessage);
   const {toggleSaved,toggleCompare}=database;
   const selectAddress=(id:string)=>setData(d=>{const address=d.addresses.find(a=>a.id===id);return address?{...d,selectedId:id,mapCenter:address.coordinates}:d;});
   const chooseAddress=(address:AddressRecord)=>setData(d=>({...d,addresses:d.addresses.some(a=>a.id===address.id)?d.addresses.map(a=>a.id===address.id?address:a):[...d.addresses,address],selectedId:address.id,mapCenter:address.coordinates}));

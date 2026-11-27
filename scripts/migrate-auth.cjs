@@ -1,0 +1,14 @@
+// Additive only: creates account tables. Existing anonymous tables and rows are never altered.
+require('@next/env').loadEnvConfig(process.cwd());const {neon}=require('@neondatabase/serverless');
+(async()=>{try{if(!process.env.DATABASE_URL)throw new Error('configuration');const sql=neon(process.env.DATABASE_URL);await sql.transaction([
+ sql`CREATE TABLE IF NOT EXISTS np_users (id uuid PRIMARY KEY, username text NOT NULL CHECK(username ~ '^[a-z][a-z0-9_]{3,19}$'), password_hash text NOT NULL CHECK(password_hash LIKE '$argon2id$%'), created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now())`,
+ sql`CREATE UNIQUE INDEX IF NOT EXISTS np_users_username_key ON np_users(username)`,
+ sql`CREATE TABLE IF NOT EXISTS np_user_sessions (token_hash text PRIMARY KEY CHECK(token_hash ~ '^[a-f0-9]{64}$'), user_id uuid NOT NULL REFERENCES np_users(id) ON DELETE CASCADE, persistent boolean NOT NULL, created_at timestamptz NOT NULL DEFAULT now(), expires_at timestamptz NOT NULL, last_used_at timestamptz NOT NULL DEFAULT now())`,
+ sql`CREATE INDEX IF NOT EXISTS np_user_sessions_user_idx ON np_user_sessions(user_id)`,
+ sql`CREATE INDEX IF NOT EXISTS np_user_sessions_expiry_idx ON np_user_sessions(expires_at)`,
+ sql`CREATE TABLE IF NOT EXISTS np_user_addresses (user_id uuid NOT NULL REFERENCES np_users(id) ON DELETE CASCADE, address_id text NOT NULL CHECK(length(address_id) BETWEEN 1 AND 200), address jsonb NOT NULL, memo text NOT NULL DEFAULT '' CHECK(length(memo)<=4000), created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now(), PRIMARY KEY(user_id,address_id))`,
+ sql`CREATE TABLE IF NOT EXISTS np_user_summaries (user_id uuid NOT NULL, address_id text NOT NULL, generation_id uuid NOT NULL, content jsonb NOT NULL, updated_at timestamptz NOT NULL DEFAULT now(), PRIMARY KEY(user_id,address_id), FOREIGN KEY(user_id,address_id) REFERENCES np_user_addresses(user_id,address_id) ON DELETE CASCADE)`,
+ sql`CREATE TABLE IF NOT EXISTS np_user_settings (user_id uuid PRIMARY KEY REFERENCES np_users(id) ON DELETE CASCADE, settings jsonb NOT NULL, updated_at timestamptz NOT NULL DEFAULT now())`,
+ sql`CREATE TABLE IF NOT EXISTS np_auth_limits (key text PRIMARY KEY CHECK(length(key)<=200), count integer NOT NULL DEFAULT 0, window_start timestamptz NOT NULL DEFAULT now(), locked_until timestamptz)`,
+ sql`CREATE TABLE IF NOT EXISTS np_anonymous_claims (owner_hash text PRIMARY KEY CHECK(owner_hash ~ '^[a-f0-9]{64}$'), user_id uuid NOT NULL REFERENCES np_users(id) ON DELETE CASCADE, claimed_at timestamptz NOT NULL DEFAULT now(), imported_count integer NOT NULL DEFAULT 0)`
+ ]);console.log('Account tables ready (additive only). No credentials printed.');}catch{console.error('Account DB initialization failed. Check DATABASE_URL and permissions.');process.exitCode=1;}})();

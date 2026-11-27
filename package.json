@@ -10,10 +10,12 @@
     "test": "playwright test",
     "db:migrate": "node scripts/migrate-saved.cjs",
     "db:migrate:tmap": "node scripts/migrate-tmap.cjs",
-    "db:cleanup": "node scripts/cleanup-saved.cjs"
+    "db:cleanup": "node scripts/cleanup-saved.cjs",
+    "db:migrate:auth": "node scripts/migrate-auth.cjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.2.1",
+    "@node-rs/argon2": "^2.2.2",
     "fast-xml-parser": "^5.12.1",
     "html-react-parser": "5.2.10",
     "next": "^16.4.6",
