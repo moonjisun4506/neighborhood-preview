@@ -39,3 +39,10 @@ export async function tmapRoutes(origin:Coordinates,destination:Coordinates):Pro
 }
 export async function peekTmapRoutes(origin:Coordinates,destination:Coordinates):Promise<TransitRoutes|null>{const out=await peekTmap<TransitDirection>('transit',origin,destination),back=await peekTmap<TransitDirection>('transit',destination,origin);if(!out)return null;return {provider:'tmap',origin,destination,outbound:out.value,inbound:back?.value??{status:'error',paths:[],message:'귀가 경로 미조회'},fetchedAt:[out.fetchedAt,back?.fetchedAt??out.fetchedAt].sort()[0],expiresAt:[out.expiresAt,back?.expiresAt??out.expiresAt].sort()[0]};}
 export const tmapWalking=(origin:Coordinates,destination:Coordinates)=>cached<WalkingRoute>('walk',origin,destination).then(r=>r.value);
+/** Read-only lookup of still-valid pedestrian cache rows. Never reserves quota or calls TMAP. */
+export async function peekTmapWalks(origin:Coordinates,destinations:Coordinates[]):Promise<(WalkingRoute|null)[]>{
+  const ids=destinations.map(destination=>id('walk',origin,destination));
+  const rows=await db()`SELECT id,content FROM np_tmap_cache WHERE id = ANY(${ids}) AND expires_at>now()`;
+  const found=new Map(rows.map(row=>[String(row.id),(row.content as Cached<WalkingRoute>)?.value??null]));
+  return ids.map(value=>found.get(value)??null);
+}

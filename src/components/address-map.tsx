@@ -2,7 +2,7 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {useApp} from './app-provider';
 import {Button} from './ui';
-import {loadKakaoMaps,type KakaoMaps,type KakaoMap,type Marker} from '@/lib/kakao-maps';
+import {loadKakaoMaps,type KakaoMaps,type KakaoMap,type Marker,type Overlay} from '@/lib/kakao-maps';
 import type {Coordinates} from '@/lib/demo-data';
 import {useFacilities} from './facilities-provider';
 import {facilityCategories,type FacilityPlace} from '@/lib/facilities';
@@ -24,6 +24,7 @@ export function AddressMap({mode='facilities'}:{mode?:'facilities'|'transport'|'
   const safety=useSafety();const safetyResult=safety.state?.result;
   const live=useRef({data,update,selected});live.current={data,update,selected};
   const map=useRef<KakaoMap|null>(null);const sdk=useRef<KakaoMaps|null>(null);const marker=useRef<Marker|null>(null);
+  type MarkerEntry={button:HTMLButtonElement;overlay:Overlay;ids:string[];zIndex:number};const facilityMarkers=useRef<MarkerEntry[]>([]);const stationMarkers=useRef<MarkerEntry[]>([]);
   const [loaded,setLoaded]=useState(false);const [error,setError]=useState('');const [attempt,setAttempt]=useState(0);const [level,setLevel]=useState(4);
   const [markerPosition,setMarkerPosition]=useState<Coordinates|null>(null);
   const viewportCenter=useRef<Coordinates|null>(null);
@@ -84,9 +85,10 @@ export function AddressMap({mode='facilities'}:{mode?:'facilities'|'transport'|'
       const symbol=document.createElement('span');symbol.className='material-symbols-outlined';symbol.setAttribute('aria-hidden','true');symbol.textContent=facilityCategories.find(c=>c[0]===place.category)?.[2]??'place';button.appendChild(symbol);
       if(group.length>1){const count=document.createElement('span');count.className='facility-marker-count';count.textContent=String(group.length);button.appendChild(count);}
       button.onclick=()=>focus(place.id);
-      return new api.CustomOverlay({map:activeMap,position:new api.LatLng(place.coordinates.lat,place.coordinates.lng),content:button,yAnchor:place.distanceMeters<25?-.3:1,zIndex:15});
-    });
-    return()=>overlays.forEach(overlay=>overlay.setMap(null));
+      const overlay=new api.CustomOverlay({map:activeMap,position:new api.LatLng(place.coordinates.lat,place.coordinates.lng),content:button,yAnchor:place.distanceMeters<25?-.3:1,zIndex:15});
+      return {button,overlay,ids:group.map(p=>p.id),zIndex:15};
+    });facilityMarkers.current=overlays;
+    return()=>{overlays.forEach(entry=>entry.overlay.setMap(null));if(facilityMarkers.current===overlays)facilityMarkers.current=[];};
   },[loaded,places,focus]);
   const focused=places.find(place=>place.id===focusId);
   const focusedStation=stations.find(station=>station.id===focusStationId);
@@ -94,17 +96,21 @@ export function AddressMap({mode='facilities'}:{mode?:'facilities'|'transport'|'
   useEffect(()=>{if(focusId||focusStationId)noise.focus(null);},[focusId,focusStationId,noise.focus]);
   useEffect(()=>{const api=sdk.current,activeMap=map.current;if(!loaded||!api||!activeMap)return;const overlays=noisePoints.map(point=>{const button=document.createElement('button');button.type='button';button.className='noise-map-marker';button.dataset.noiseId=point.id;button.setAttribute('aria-label',`소음 측정 지점: ${point.name}`);const icon=document.createElement('span');icon.className='material-symbols-outlined';icon.textContent='volume_up';icon.setAttribute('aria-hidden','true');button.appendChild(icon);button.onclick=()=>noise.focus(point.id);return new api.CustomOverlay({map:activeMap,position:new api.LatLng(point.coordinates.lat,point.coordinates.lng),content:button,yAnchor:1,zIndex:7});});return()=>overlays.forEach(o=>o.setMap(null));},[loaded,noisePoints,noise.focus]);
   useEffect(()=>{if(focusedNoise&&loaded&&sdk.current)map.current?.panTo(new sdk.current.LatLng(focusedNoise.coordinates.lat,focusedNoise.coordinates.lng));},[focusedNoise?.id,loaded]);
-  useEffect(()=>{if(focusStationId)focus(null);},[focusStationId,focus]);
-  useEffect(()=>{if(focusId)focusStation(null);},[focusId,focusStation]);
   useEffect(()=>{
     const api=sdk.current,activeMap=map.current;if(!loaded||!api||!activeMap)return;
     const overlays=stations.map(station=>{
       const button=document.createElement('button');button.type='button';button.className='transit-map-marker facility-station-marker';button.dataset.kind=station.kind;button.dataset.stationId=station.id;
       button.setAttribute('aria-label',`${station.kind==='bus'?'버스정류장':'지하철역'}: ${station.name}`);button.title=station.name;
       const icon=document.createElement('span');icon.className='material-symbols-outlined';icon.textContent=station.kind==='bus'?'directions_bus':'directions_subway';icon.setAttribute('aria-hidden','true');button.appendChild(icon);button.onclick=()=>focusStation(station.id);
-      return new api.CustomOverlay({map:activeMap,position:new api.LatLng(station.coordinates.lat,station.coordinates.lng),content:button,yAnchor:1,zIndex:6});
-    });return()=>overlays.forEach(overlay=>overlay.setMap(null));
+      const overlay=new api.CustomOverlay({map:activeMap,position:new api.LatLng(station.coordinates.lat,station.coordinates.lng),content:button,yAnchor:1,zIndex:6});
+      return {button,overlay,ids:[station.id],zIndex:6};
+    });stationMarkers.current=overlays;return()=>{overlays.forEach(entry=>entry.overlay.setMap(null));if(stationMarkers.current===overlays)stationMarkers.current=[];};
   },[loaded,stations,focusStation]);
+  // Selection only restyles existing markers (darker category tone, larger, on top); markers are not recreated.
+  useEffect(()=>{
+    const apply=(entries:MarkerEntry[],id:string|null)=>entries.forEach(entry=>{const on=id!==null&&entry.ids.includes(id);entry.button.classList.toggle('is-selected',on);entry.button.setAttribute('aria-pressed',String(on));entry.overlay.setZIndex?.(on?40:entry.zIndex);});
+    apply(facilityMarkers.current,focusId);apply(stationMarkers.current,focusStationId);
+  },[loaded,places,stations,focusId,focusStationId]);
   useEffect(()=>{if(focusedStation&&loaded&&sdk.current)map.current?.panTo(new sdk.current.LatLng(focusedStation.coordinates.lat,focusedStation.coordinates.lng));},[focusedStation?.id,loaded]);
   useEffect(()=>{
     const api=sdk.current,activeMap=map.current;const destination=live.current.data.destinationLocation;if(!loaded||!api||!activeMap||!destination?.coordinates)return;
