@@ -1,20 +1,24 @@
 'use client';
-import {createContext,useContext,useEffect,useMemo,useRef,useState,type ReactNode} from 'react';
+import {createContext,useCallback,useContext,useEffect,useMemo,useRef,useState,type ReactNode} from 'react';
 import {usePathname} from 'next/navigation';
 import {useApp} from './app-provider';
+import {facilityPrefix,selectedIdFor,useSelection} from './selection-provider';
 import {isFacilityCategory,nearestFacilities,type FacilityCategory,type FacilityPlace,type FacilityResponse} from '@/lib/facilities';
 type CategoryState={status:'loading'|'success'|'error';response?:FacilityResponse;error?:string};
 type State={key:string;categories:Partial<Record<FacilityCategory,CategoryState>>};
 const Context=createContext<{categories:State['categories'];places:FacilityPlace[];loading:boolean;enabled:FacilityCategory[];available:boolean;retry:()=>void;focusId:string|null;focus:(id:string|null)=>void}>(null!);
 export function FacilitiesProvider({children}:{children:ReactNode}){
-  const {data,selected,ready}=useApp();const pathname=usePathname();const [state,setState]=useState<State>({key:'',categories:{}});const [attempt,setAttempt]=useState(0);const [focusId,focus]=useState<string|null>(null);
+  const {data,selected,ready}=useApp();const pathname=usePathname();const [state,setState]=useState<State>({key:'',categories:{}});const [attempt,setAttempt]=useState(0);
+  const {selectedPlaceId,selectPlace}=useSelection();const focusId=selectedIdFor(selectedPlaceId,facilityPrefix);
+  // focus(null) only clears a facility selection, never a selected bus stop or station.
+  const focus=useCallback((id:string|null)=>selectPlace(current=>id!==null?facilityPrefix+id:current?.startsWith(facilityPrefix)?null:current),[selectPlace]);
   const cache=useRef(new Map<string,FacilityResponse>());
   const lat=selected?.source==='kakao'?selected.coordinates?.lat:undefined,lng=selected?.source==='kakao'?selected.coordinates?.lng:undefined;
   const available=lat!==undefined&&lng!==undefined;const key=available?`${selected!.id}|${lat}|${lng}|${data.radius}`:'';
   const layerKey=data.layers.filter(isFacilityCategory).sort().join(',');
   const active=pathname==='/'||pathname==='/explore';
   useEffect(()=>{
-    focus(null);if(!ready||!available||!active)return;
+    if(!ready||!available||!active)return;
     const controller=new AbortController();const enabled=layerKey.split(',').filter(isFacilityCategory);
     const categories:State['categories']={};const queue:FacilityCategory[]=[];
     for(const category of enabled){const cached=cache.current.get(`${key}|${category}`);if(cached)categories[category]={status:'success',response:cached};else{categories[category]={status:'loading'};queue.push(category);}}
@@ -34,6 +38,8 @@ export function FacilitiesProvider({children}:{children:ReactNode}){
   const enabled=useMemo(()=>layerKey.split(',').filter(isFacilityCategory),[layerKey]);
   const categories=useMemo(()=>available&&state.key===key?state.categories:{},[available,state,key]);
   const places=useMemo(()=>lat===undefined||lng===undefined?[]:enabled.flatMap(category=>nearestFacilities({lat,lng},categories[category]?.response?.places??[],category,data.radius)),[enabled,categories,lat,lng,data.radius]);
+  // A facility hidden by a filter, radius or address change cannot stay selected.
+  useEffect(()=>{if(focusId&&!places.some(p=>p.id===focusId))focus(null);},[focusId,places,focus]);
   const retry=()=>{for(const category of enabled){if(categories[category]?.status==='error'||categories[category]?.response?.warning)cache.current.delete(`${key}|${category}`);}setAttempt(v=>v+1);};
   return <Context.Provider value={{categories,places,loading:available&&enabled.some(c=>!categories[c]||categories[c]?.status==='loading'),enabled,available,retry,focusId,focus}}>{children}</Context.Provider>;
 }

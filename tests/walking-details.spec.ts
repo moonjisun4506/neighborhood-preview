@@ -30,6 +30,8 @@ test('LIVE eight walking destinations: two stores, pharmacies, bus stops and sta
   await page.addInitScript(house=>localStorage.setItem('neighborhood-preview-v2',JSON.stringify({addresses:[house],selectedId:house.id,saved:[],compare:[],notes:{},layers:['convenience','medical'],facilityLayerVersion:1,radius:1000})),house);
   await page.route('**/api/facilities?**',r=>{const category=new URL(r.request().url()).searchParams.get('category');return r.fulfill({json:{source:'kakao',origin,radius:1000,category,places:category==='medical'?pharmacies:stores}});});
   await page.route('**/api/transit/nearby?**',r=>r.fulfill({json:{provider:'public',origin,radius:1000,stations:[...buses,...subways],fetchedAt:new Date().toISOString()}}));
+  // Server-cache lookup is disabled here so every click is observed as its own pedestrian request.
+  await page.route('**/api/walking/cached',r=>r.fulfill({json:{results:[]}}));
   let calls=0;page.on('request',r=>{if(r.url().includes('/api/tmap/walk'))calls++;});
   await page.goto('/explore');await expect(page.getByTestId('map-canvas')).toHaveAttribute('data-map-ready','true',{timeout:30000});expect(calls).toBe(0);
   await page.locator('.facility-list-disclosure>summary').click();await page.locator('.transit-disclosure>summary').click();

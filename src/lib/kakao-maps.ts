@@ -1,7 +1,7 @@
 'use client';
 export interface LatLng {getLat():number;getLng():number;}
 export interface KakaoMap {getCenter():LatLng;setCenter(position:LatLng):void;panTo(position:LatLng):void;getLevel():number;setLevel(level:number):void;relayout():void;getProjection():{pointFromCoords(position:LatLng):{x:number;y:number}};}
-interface Overlay {setMap(map:KakaoMap|null):void;}
+export interface Overlay {setMap(map:KakaoMap|null):void;setZIndex?(zIndex:number):void;}
 interface AbstractOverlay extends Overlay {getProjection():{pointFromCoords(position:LatLng):{x:number;y:number}};getPanels():{overlayLayer:HTMLElement};onAdd():void;draw():void;onRemove():void;}
 export interface Marker extends Overlay {getPosition():LatLng;}
 export interface KakaoMaps {
