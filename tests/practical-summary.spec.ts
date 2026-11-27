@@ -51,7 +51,7 @@ test('LIVE three Seoul addresses: grounded seven cards, no additional routing, r
   for(const [index,q] of ['서울 중구 세종대로 110','서울 마포구 와우산로 94','서울 송파구 올림픽로 300'].entries()){
     await page.setViewportSize(index===1?{width:390,height:844}:{width:1440,height:1000});
     await page.emulateMedia({colorScheme:index===1?'dark':'light'});
-    if(!index)await page.goto('/');else await page.getByRole('tab',{name:'주변 시설',exact:true}).click();
+    if(!index)await page.goto('/');else{await page.getByRole('tab',{name:'주변 시설',exact:true}).click();await expect(page).toHaveURL(/\/explore$/);await expect(page.getByRole('tab',{name:'주변 시설',exact:true})).toHaveAttribute('aria-selected','true');}
     await page.getByLabel('관심 있는 집 주소, 건물명 또는 지역').fill(q);
     const lookup=page.waitForResponse(r=>r.url().includes('/api/locations/search?'));
     await page.getByRole('button',{name:'주소 검색',exact:true}).click();
