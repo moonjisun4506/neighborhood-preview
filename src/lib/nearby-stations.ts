@@ -2,7 +2,7 @@ import type {Coordinates} from './demo-data';
 import {straightLineDistance} from './facilities';
 import {validCoordinates,type TransitStation,type NearbySource,type TransitNearby} from './transit';
 export const subwaySource={source:'카카오 로컬 SW8',sourceUrl:'https://developers.kakao.com/docs/latest/ko/local/dev-guide#search-by-category'};
-export const busSource={source:'서울특별시 정류소정보조회 서비스',sourceUrl:'https://www.data.go.kr/data/15000303/openapi.do'};
+export const busSource={source:'서울특별시 · 서울시 버스정류소 위치정보',sourceUrl:'https://data.seoul.go.kr/dataList/OA-15067/S/1/datasetView.do'};
 export function nearbyKindFact(data:TransitNearby,kind:'bus'|'subway'){const label=kind==='bus'?'버스정류장':'지하철역',state=data.sources?.[kind],station=data.stations.find(s=>s.kind===kind),source=state?.source??'ODsay 주변 정류장 응답';if(station)return {text:`${label} ${station.name}, 직선 약 ${Math.round(station.distanceMeters)}m${state?.status==='partial'?' · 일부 조회 결과':''}.`,source};return {text:state&&!['ok','empty'].includes(state.status)?`${label} 자료는 미확인입니다. 조회 실패·설정 필요 또는 미지원이며 정류장이 없다는 의미는 아닙니다.`:`${label}: 같은 검색 반경 내 반환된 결과가 없습니다.`,source};}
 type Row=Record<string,unknown>;
 function point(x:unknown,y:unknown){if(x==null||y==null||!String(x).trim()||!String(y).trim())return null;const value={lat:Number(y),lng:Number(x)};return validCoordinates(value)?value:null;}

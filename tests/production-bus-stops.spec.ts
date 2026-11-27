@@ -1,0 +1,24 @@
+import {test,expect} from '@playwright/test';
+import {writeFile} from 'node:fs/promises';
+import {straightLineDistance} from '../src/lib/facilities';
+import type {TransitNearby} from '../src/lib/transit';
+const production=process.env.PRODUCTION_URL?.replace(/\/$/,'');
+test.skip(!production,'Set PRODUCTION_URL to verify the deployed site.');
+
+test('PRODUCTION real bus lookup, markers, filters and walking at three Seoul addresses',async({page},info)=>{
+ test.setTimeout(180000);const observations=[];let walks=0,transit=0,walkingBlocked='';
+ page.on('request',r=>{if(r.url().includes('/api/tmap/walk'))walks++;if(r.url().includes('/api/tmap/transit'))transit++;});
+ await page.goto(production!+'/');
+ for(const [index,q]of ['서울 중구 세종대로 110','서울 마포구 와우산로 94','서울 송파구 올림픽로 300'].entries()){
+  await page.setViewportSize({width:index===1?390:1440,height:1000});await page.getByLabel('관심 있는 집 주소, 건물명 또는 지역').fill(q);const searching=page.waitForResponse(r=>r.url().includes('/api/locations/search?'));await page.getByRole('button',{name:'주소 검색',exact:true}).click();const search=await searching;expect(search.ok()).toBe(true);const address=(await search.json()).results[0],origin=address.coordinates;
+  const nearbyResponse=page.waitForResponse(r=>{if(!r.url().includes('/api/transit/nearby?'))return false;const p=new URL(r.url()).searchParams;return Number(p.get('lat'))===origin.lat&&Number(p.get('lng'))===origin.lng;});await page.locator('.address-search .address-option').first().click();await expect(page).toHaveURL(production!+'/explore');const response=await nearbyResponse;expect(response.ok()).toBe(true);const data:TransitNearby=await response.json(),buses=data.stations.filter(s=>s.kind==='bus');expect(data.sources?.bus.status).toBe('ok');expect(data.sources?.bus.sourceUrl).toContain('OA-15067');expect(data.sources?.bus.message).toContain('2026-11-02');expect(buses.length).toBeGreaterThan(0);for(const bus of buses)expect(straightLineDistance(origin,bus.coordinates)).toBeLessThanOrEqual(data.radius);
+  await expect(page.getByTestId('map-canvas')).toHaveAttribute('data-map-ready','true',{timeout:30000});await page.getByRole('button',{name:'선택 주소로 복귀',exact:true}).click();for(let zoom=0;zoom<3;zoom++)await page.getByRole('button',{name:'− 축소',exact:true}).click();await expect(page.locator('.transit-map-marker[data-kind=bus]')).toHaveCount(buses.length);const before=walks;
+  if(index===1)await page.getByRole('button',{name:'시설 필터',exact:true}).click();const toggle=page.getByRole('checkbox',{name:'버스정류장 표시'});await toggle.uncheck();await expect(page.locator('.transit-map-marker[data-kind=bus]')).toHaveCount(0);await toggle.check();await expect(page.locator('.transit-map-marker[data-kind=bus]')).toHaveCount(buses.length);expect(walks).toBe(before);if(index===1)await page.getByRole('button',{name:'필터 닫기',exact:true}).click();
+  const disclosure=page.locator('.transit-disclosure');if(await disclosure.getAttribute('open')===null)await disclosure.locator('summary').click();const stop=buses[0];let walking:unknown={status:'not_tested',reason:walkingBlocked};
+  if(!walkingBlocked){const pending=page.waitForResponse(r=>r.url().includes('/api/tmap/walk'));const item=page.locator('.transit-station-list [data-station-id="'+stop.id+'"]');await item.click();const walkResponse=await pending,walk=await walkResponse.json();expect(walkResponse.request().postDataJSON()).toEqual({origin,destination:stop.coordinates});walking={http:walkResponse.status(),...walk};const popup=page.getByRole('dialog',{name:'정류장 상세 정보'});await expect(popup).toContainText(stop.name);
+   if(walkResponse.ok()&&walk.status==='ok'&&walk.distanceMeters!==null&&walk.seconds!==null){await expect(popup).toContainText('도보 '+Math.round(walk.distanceMeters)+'m · 예상 '+Math.ceil(walk.seconds/60)+'분');const count=walks;await popup.getByRole('button',{name:'정류장 상세 닫기'}).click();await item.click();await expect(popup).toContainText(Math.round(walk.distanceMeters)+'m');expect(walks).toBe(count);}else{walkingBlocked=String(walk.code??walk.status??'unknown');await expect(popup).toContainText('도보 정보 확인 불가');}
+  }
+  expect(transit).toBe(0);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);await page.evaluate(()=>scrollTo(0,0));await page.screenshot({path:info.outputPath('production-bus-'+index+'.png'),fullPage:true});observations.push({address:address.address,radius:data.radius,buses:buses.length,source:data.sources?.bus,stop,walking});const popup=page.getByRole('dialog',{name:'정류장 상세 정보'});if(await popup.count())await popup.getByRole('button',{name:'정류장 상세 닫기'}).click();
+ }
+ await writeFile(info.outputPath('production-bus-observations.json'),JSON.stringify(observations,null,2));expect(walkingBlocked,'Actual walking provider response failed; later requests were skipped').toBe('');
+});

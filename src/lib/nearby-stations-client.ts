@@ -1,7 +1,7 @@
 'use client';
 import type {Coordinates} from './demo-data';
 import type {TransitNearby} from './transit';
-const storage='np-public-stations-v1',pending=new Map<string,Promise<TransitNearby>>(),refresh=new Set<string>();
+const storage='np-public-stations-v2',pending=new Map<string,Promise<TransitNearby>>(),refresh=new Set<string>();
 type Entry={until:number;data:TransitNearby};let cache:Record<string,Entry>|undefined;
 const key=(origin:Coordinates,radius:number)=>JSON.stringify([origin.lat,origin.lng,radius]);
 function entries(){if(!cache){try{cache=JSON.parse(sessionStorage.getItem(storage)??'{}');}catch{}if(!cache||typeof cache!=='object'||Array.isArray(cache))cache={};}for(const [id,item] of Object.entries(cache))if(!item||item.until<=Date.now())delete cache[id];return cache;}

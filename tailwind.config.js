@@ -232,6 +232,7 @@ module.exports = {
     }
   },
   "content": [
-    "./src/**/*.{ts,tsx,json}"
+    "./src/**/*.{ts,tsx,json}",
+    "!./src/data/**/*.json"
   ]
 }
